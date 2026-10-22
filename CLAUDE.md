@@ -14,6 +14,8 @@ pnpm lint       # Biome; lint:fix escribe
 
 Sin tests. Antes de dar algo por terminado: `pnpm lint && pnpm check && pnpm build`.
 
+Docker: `docker build -t jenner-codes . && docker run --rm -p 8088:80 jenner-codes` (nginx sirve `dist/`; `/ruta` → `ruta.html`, 404 real).
+
 ## Stack
 
 Astro 7 (estático, `build.format: 'file'`, `trailingSlash: 'never'`) · Tailwind v4 vía `@tailwindcss/vite` · fuentes auto-hospedadas con la Fonts API de Astro (`astro.config.mjs`) · Biome · pnpm · TypeScript 5.9 (no 7: `@astrojs/check` no lo soporta).
@@ -29,7 +31,9 @@ Astro 7 (estático, `build.format: 'file'`, `trailingSlash: 'never'`) · Tailwin
 | Animaciones GSAP del modo normal (atributos `data-*`) | `src/lib/motion.ts` |
 | Casos de estudio | `src/content/proyectos/*.md` (schema en `src/content.config.ts`) |
 | Tokens de color, degradados, `prose-case` | `src/styles/global.css` |
-| Layout + SEO + JSON-LD | `src/layouts/Base.astro` |
+| Layout + SEO + JSON-LD (Person; cada página suma el suyo con `schema`) | `src/layouts/Base.astro` |
+| Imágenes para compartir (og:image), generadas en build | `src/lib/og.ts` + `src/pages/og/[...slug].png.ts` (página nueva → agregarla ahí y pasar `og` a `Base`) |
+| Despliegue (Coolify, build pack Dockerfile, puerto 80) | `Dockerfile` + `docker/nginx.conf` |
 
 `featured: true` → aparece en "Trabajo seleccionado" de la portada. `personal: true` → etiqueta "Proyecto personal". Sin `end` → "— hoy".
 

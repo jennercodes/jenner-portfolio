@@ -1,14 +1,35 @@
 ---
 import ProjectRow from '../../components/ProjectRow.astro';
+import { site } from '../../data/site';
 import Base from '../../layouts/Base.astro';
 import { getProyectos } from '../../lib/proyectos';
 
 const proyectos = await getProyectos();
+
+const schema = [
+  {
+    '@type': 'CollectionPage',
+    name: 'Proyectos',
+    url: `${site.url}/proyectos`,
+    inLanguage: 'es',
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: proyectos.map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: p.data.title,
+        url: `${site.url}/proyectos/${p.id}`,
+      })),
+    },
+  },
+];
 ---
 
 <Base
   title="Proyectos"
   description="E-commerce multi-marca en Delosi, la plataforma educativa Skolerom, Hostbox y webs para marcas y artistas."
+  og="proyectos"
+  schema={schema}
 >
   <section class="mx-auto max-w-6xl px-4 pt-12 pb-24 sm:px-8 sm:pt-20" aria-labelledby="proyectos-title">
     <p data-hero-item class="font-mono text-xs tracking-[0.16em] text-muted uppercase">{proyectos.length} proyectos</p>
