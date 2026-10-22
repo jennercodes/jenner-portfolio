@@ -1,0 +1,96 @@
+---
+/*
+ * Navegación inferior en móvil (< md). En escritorio la navegación vive en el header.
+ * En la portada, Charlas y Contacto se marcan al llegar a su sección.
+ */
+const path = Astro.url.pathname.replace(/\.html$/, '').replace(/(.)\/$/, '$1');
+
+const items = [
+  { label: 'Inicio', href: '/', icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z' },
+  {
+    label: 'Proyectos',
+    href: '/proyectos',
+    icon: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+  },
+  {
+    label: 'Charlas',
+    href: '/#charlas',
+    icon: 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3',
+  },
+  { label: 'Sobre mí', href: '/sobre-mi', icon: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0' },
+  { label: 'Contacto', href: '/#contacto', icon: 'M3 6h18v12H3zM3 7l9 6 9-6' },
+];
+
+const isCurrent = (href: string) =>
+  href === '/' ? path === '/' : !href.includes('#') && (path === href || path.startsWith(`${href}/`));
+---
+
+<nav
+  data-bottom-nav
+  aria-label="Secciones"
+  class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
+>
+  <ul class="mx-auto grid max-w-md grid-cols-5">
+    {
+      items.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            data-section={item.href.includes('#') ? item.href.split('#')[1] : undefined}
+            aria-current={isCurrent(item.href) ? 'page' : undefined}
+            class="flex h-16 flex-col items-center justify-center gap-1 font-mono text-[11px] text-muted transition-colors aria-[current=page]:text-accent active:text-fg"
+          >
+            <svg
+              class="size-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d={item.icon} />
+            </svg>
+            {item.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<script>
+  // En la portada: Inicio, Charlas o Contacto según la sección visible
+  const nav = document.querySelector<HTMLElement>('[data-bottom-nav]');
+  const sections = ['charlas', 'contacto']
+    .map((id) => document.getElementById(id))
+    .filter((el): el is HTMLElement => el !== null);
+
+  if (nav && sections.length) {
+    const links = [...nav.querySelectorAll<HTMLAnchorElement>('a')];
+    const home = links.find((a) => a.getAttribute('href') === '/');
+    const visible = new Set<string>();
+
+    const update = () => {
+      const active = sections.map((s) => s.id).findLast((id) => visible.has(id));
+      for (const a of links) {
+        const on = active ? a.dataset.section === active : a === home;
+        if (on) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) visible.add(e.target.id);
+          else visible.delete(e.target.id);
+        }
+        update();
+      },
+      { rootMargin: '-40% 0px -40% 0px' },
+    );
+    for (const s of sections) observer.observe(s);
+  }
+</script>

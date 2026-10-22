@@ -7,13 +7,13 @@ import Wordmark from './Wordmark.astro';
 const current = Astro.url.pathname.replace(/\.html$/, '');
 ---
 
-<header class="[view-transition-name:site-header] mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-4 px-4 py-6 sm:px-8">
+<header class="[view-transition-name:site-header] mx-auto flex w-full max-w-6xl items-center justify-between gap-x-8 px-4 py-6 sm:px-8">
   <Wordmark />
   <nav aria-label="Principal">
-    <ul class="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[13px] sm:gap-x-8">
+    <ul class="flex items-center gap-x-8 font-mono text-[13px]">
       {
         nav.map((item) => (
-          <li>
+          <li class="hidden md:block">
             <a
               href={item.href}
               aria-current={current === item.href ? 'page' : undefined}
@@ -24,7 +24,7 @@ const current = Astro.url.pathname.replace(/\.html$/, '');
           </li>
         ))
       }
-      <li>
+      <li class="hidden md:block">
         <a
           href="/#contacto"
           data-magnetic
