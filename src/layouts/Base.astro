@@ -1,0 +1,116 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { site } from '../data/site';
+
+interface Props {
+  /** Título de la página; se completa con " · jenner.codes". */
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const { title, description = site.description, noindex = false } = Astro.props;
+
+const fullTitle = title
+  ? `${title} · ${site.name}`
+  : `${site.author} · Senior Frontend Engineer · ${site.name}`;
+const canonical = new URL(Astro.url.pathname.replace(/\.html$/, ''), site.url).href;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.author,
+  alternateName: site.fullName,
+  url: site.url,
+  jobTitle: 'Senior Frontend Engineer',
+  worksFor: { '@type': 'Organization', name: 'Delosi' },
+  address: { '@type': 'PostalAddress', addressLocality: 'Lima', addressCountry: 'PE' },
+  sameAs: site.socials.map((s) => s.url),
+};
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow'} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    <script is:inline>
+      // Antes de pintar: tema y modo guardados (ThemeToggle.astro, src/lib/mode.ts) y clase de movimiento
+      (() => {
+        const root = document.documentElement;
+        try {
+          const t = localStorage.getItem('theme');
+          if (t === 'light' || t === 'dark') {
+            root.dataset.theme = t;
+            for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
+              m.content = t === 'dark' ? '#09090b' : '#fafafa';
+            }
+          }
+          const url = new URL(location.href);
+          const param = url.searchParams.get('modo');
+          if (param) {
+            if (param === 'terminal') localStorage.setItem('mode', 'terminal');
+            else localStorage.removeItem('mode');
+            url.searchParams.delete('modo');
+            history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+          }
+          if (localStorage.getItem('mode') === 'terminal') root.dataset.mode = 'terminal';
+        } catch {}
+        if (root.dataset.mode !== 'terminal' && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+          root.classList.add('motion');
+          // Si GSAP no llega, el contenido se muestra igual
+          setTimeout(() => root.classList.remove('motion'), 2500);
+        }
+      })();
+    </script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_PE" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+
+    <Font cssVariable="--font-space-grotesk" preload />
+    <Font cssVariable="--font-jetbrains-mono" preload />
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body class="flex min-h-dvh flex-col bg-bg text-fg">
+    <a
+      href="#contenido"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-btn-bg focus:px-4 focus:py-2 focus:text-btn-fg"
+      >Saltar al contenido</a
+    >
+    <slot name="hero">
+      <Header />
+    </slot>
+    <main id="contenido" class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+    <div data-tui><p class="tui-loading">cargando ~/jenner.codes…</p></div>
+    <script>
+      import { isTerminal } from '../lib/mode';
+
+      if (isTerminal()) {
+        import('../lib/tui').then(({ mountTui }) => mountTui());
+      } else {
+        import('../lib/motion').then(({ initMotion }) => initMotion());
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+---
+import { formatPeriod, type Proyecto } from '../lib/proyectos';
+import Tag from './Tag.astro';
+
+interface Props {
+  proyecto: Proyecto;
+  /** Muestra rol y stack (listado completo) */
+  detailed?: boolean;
+}
+
+const { proyecto, detailed = false } = Astro.props;
+const { title, summary, personal, role, stack } = proyecto.data;
+---
+
+<li class="border-t border-line">
+  <a
+    href={`/proyectos/${proyecto.id}`}
+    class="group grid grid-cols-[minmax(0,1fr)_auto] gap-x-6 gap-y-1 py-4 sm:py-5"
+  >
+    <span class="flex flex-wrap items-center gap-3 text-[19px] font-semibold transition-[color,translate] duration-300 group-hover:translate-x-1.5 group-hover:text-accent">
+      {title}
+      {personal && <Tag>Proyecto personal</Tag>}
+    </span>
+    <span class="font-mono text-[13px] text-muted">{formatPeriod(proyecto.data)}</span>
+    <span class="col-span-2 text-[15px] text-muted">{summary}</span>
+    {
+      detailed && (
+        <span class="col-span-2 mt-2 font-mono text-[13px] text-muted">
+          {role}
+          <span class="text-subtle"> · </span>
+          {stack.join(' · ')}
+        </span>
+      )
+    }
+  </a>
+</li>

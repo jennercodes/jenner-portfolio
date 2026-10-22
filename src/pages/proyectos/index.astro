@@ -1,0 +1,20 @@
+---
+import ProjectRow from '../../components/ProjectRow.astro';
+import Base from '../../layouts/Base.astro';
+import { getProyectos } from '../../lib/proyectos';
+
+const proyectos = await getProyectos();
+---
+
+<Base
+  title="Proyectos"
+  description="E-commerce multi-marca en Delosi, la plataforma educativa Skolerom, Hostbox y webs para marcas y artistas."
+>
+  <section class="mx-auto max-w-6xl px-4 pt-12 pb-24 sm:px-8 sm:pt-20" aria-labelledby="proyectos-title">
+    <p data-hero-item class="font-mono text-xs tracking-[0.16em] text-muted uppercase">{proyectos.length} proyectos</p>
+    <h1 id="proyectos-title" data-split class="mt-4 text-5xl font-semibold tracking-[-0.04em] sm:text-7xl">Proyectos</h1>
+    <ul data-stagger class="mt-12 border-b border-line">
+      {proyectos.map((p) => <ProjectRow proyecto={p} detailed />)}
+    </ul>
+  </section>
+</Base>

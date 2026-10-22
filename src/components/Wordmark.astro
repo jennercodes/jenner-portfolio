@@ -1,0 +1,15 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<a
+  href="/"
+  class:list={['text-[22px] font-semibold tracking-[-0.03em] text-fg no-underline', className]}
+  aria-label="jenner.codes, ir al inicio"
+>
+  jenner<span class="font-mono font-medium tracking-[-0.02em] text-accent">.codes</span>
+</a>

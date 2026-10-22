@@ -1,0 +1,24 @@
+---
+/** Entra al modo terminal (src/lib/mode.ts). Se sale con /exit. */
+---
+
+<button
+  type="button"
+  data-mode-toggle
+  data-magnetic
+  aria-label="Modo terminal"
+  title="Modo terminal"
+  class="inline-flex size-9 items-center justify-center rounded-lg border border-subtle bg-surface text-muted transition-colors hover:border-muted hover:text-fg"
+>
+  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m5 7 5 5-5 5M13 17h6" />
+  </svg>
+</button>
+
+<script>
+  import { enterTerminal } from '../lib/mode';
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-mode-toggle]')) {
+    button.addEventListener('click', () => enterTerminal());
+  }
+</script>
