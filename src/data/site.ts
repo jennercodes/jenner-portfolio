@@ -32,8 +32,28 @@ export const principles = [
   'Cero código comentado en el repo.',
 ] as const;
 
-export const talks = [
+export interface Talk {
+  /** Clave de la foto en src/pages/index.astro */
+  id: string;
+  title: string;
+  event: string;
+  date: string;
+  role: string;
+  url?: string;
+  linkLabel?: string;
+}
+
+/** De la más reciente a la más antigua */
+export const talks: readonly Talk[] = [
   {
+    id: 'github-community-day-2026',
+    title: 'Del commit al deploy: flujos de trabajo modernos con GitHub y Claude',
+    event: 'GitHub Community Day Perú',
+    date: '2026-06-06',
+    role: 'Speaker',
+  },
+  {
+    id: 'gdg-open-lima-2026',
     title: 'Cómo gestionar múltiples marcas sin perder la cabeza',
     event: 'GDG Open Lima',
     date: '2026-03-27',
@@ -41,7 +61,7 @@ export const talks = [
     url: 'https://github.com/jennercodes/frontend-architecture',
     linkLabel: 'Código de la demo',
   },
-] as const;
+];
 
 /** Sobre mí: lo usan la página y el modo terminal */
 export const about = {

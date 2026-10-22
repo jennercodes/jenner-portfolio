@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import githubCommunityDay from '../assets/charlas/github-community-day-2026.jpg';
 import Crosshairs from '../components/Crosshairs.astro';
 import Header from '../components/Header.astro';
 import ProjectRow from '../components/ProjectRow.astro';
@@ -8,6 +10,12 @@ import Base from '../layouts/Base.astro';
 import { getDestacados } from '../lib/proyectos';
 
 const destacados = await getDestacados();
+const talkPhotos: Record<string, { src: ImageMetadata; alt: string }> = {
+  'github-community-day-2026': {
+    src: githubCommunityDay,
+    alt: 'Foto grupal con los asistentes a la charla en el GitHub Community Day Perú 2026',
+  },
+};
 const dateFmt = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 ---
 
@@ -56,20 +64,39 @@ const dateFmt = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric
     <h2 id="charlas-title" data-reveal class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Charlas</h2>
     <ul data-stagger class="mt-6">
       {
-        talks.map((t) => (
-          <li class="grid gap-x-8 gap-y-2 border-t border-line py-6 sm:grid-cols-[minmax(0,1fr)_auto]">
-            <span class="text-2xl font-semibold tracking-[-0.02em]">{t.title}</span>
-            <span class="font-mono text-[13px] text-muted sm:text-right">
-              {t.event} · {dateFmt.format(new Date(t.date))}
-            </span>
-            <span class="font-mono text-[13px] text-muted">
-              {t.role} ·{' '}
-              <a href={t.url} target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-strong">
-                {t.linkLabel} ↗
-              </a>
-            </span>
-          </li>
-        ))
+        talks.map((t) => {
+          const photo = talkPhotos[t.id];
+          return (
+            <li class="grid gap-6 border-t border-line py-6 md:grid-cols-[minmax(0,1fr)_280px]">
+              <div class="flex flex-col gap-2">
+                <span class="text-2xl font-semibold tracking-[-0.02em]">{t.title}</span>
+                <span class="font-mono text-[13px] text-muted">
+                  {t.event} · {dateFmt.format(new Date(t.date))}
+                </span>
+                <span class="font-mono text-[13px] text-muted">
+                  {t.role}
+                  {t.url && (
+                    <>
+                      {' · '}
+                      <a href={t.url} target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-strong">
+                        {t.linkLabel ?? 'Recursos'} ↗
+                      </a>
+                    </>
+                  )}
+                </span>
+              </div>
+              {photo && (
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  widths={[280, 560, 840]}
+                  sizes="(min-width: 768px) 280px, 100vw"
+                  class="aspect-[3/2] w-full rounded-xl border border-line object-cover"
+                />
+              )}
+            </li>
+          );
+        })
       }
     </ul>
   </section>

@@ -76,7 +76,7 @@ function charlas(data: TuiData): string {
       '',
       `- \`${t.event} · ${fmt.format(new Date(t.date))}\``,
       `- ${t.role}`,
-      `- [${t.linkLabel}](${t.url})`,
+      ...(t.url ? [`- [${t.linkLabel ?? 'Recursos'}](${t.url})`] : []),
       '',
     ]),
   ].join('\n');

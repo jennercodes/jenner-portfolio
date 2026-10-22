@@ -14,7 +14,13 @@ interface TerminalData {
   whatsapp: string;
   socials: readonly { label: string; url: string }[];
   principles: readonly string[];
-  talks: readonly { title: string; event: string; date: string; url: string; linkLabel: string }[];
+  talks: readonly {
+    title: string;
+    event: string;
+    date: string;
+    url?: string;
+    linkLabel?: string;
+  }[];
   proyectos: {
     id: string;
     title: string;
@@ -226,12 +232,10 @@ export function createTerminal(root: HTMLElement): void {
         print(INDENT, { text: t.title, tone: 'fg' });
         print(
           INDENT,
-          { text: `${t.event} · ${date} · `, tone: 'dim' },
-          {
-            text: t.linkLabel,
-            href: t.url,
-            external: true,
-          },
+          { text: `${t.event} · ${date}`, tone: 'dim' },
+          ...(t.url
+            ? [' · ', { text: t.linkLabel ?? 'Recursos', href: t.url, external: true }]
+            : []),
         );
       }
     },

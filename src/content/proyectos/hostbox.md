@@ -6,6 +6,7 @@ summary: Hosting para más de 50 proyectos.
 stack: [Astro, Hono, PostgreSQL, Docker, WHMCS]
 featured: true
 personal: true
+url: https://hostbox.pe
 order: 4
 ---
 

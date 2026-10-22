@@ -11,11 +11,11 @@ order: 1
 
 Pidelo es el e-commerce de las 8 marcas de Delosi en Perú: KFC, Starbucks, Burger King, Pizza Hut, Chili's, Madam Tusan, Pinkberry y Wanta. Todas venden online sobre una misma base.
 
-A cargo hoy de las iniciativas de e-commerce de Chili's, Madam Tusan, Pinkberry y Wanta, dentro de un equipo frontend de unas seis personas. Antes, paso por todas las marcas menos Starbucks.
+Hoy, liderando el equipo web de Chili's, Madam Tusan, Pinkberry y Wanta, y sumando iniciativas de Starbucks. Antes, paso por las demás marcas del grupo.
 
 ## La librería compartida
 
-Migración de los módulos base, los que siempre se repiten entre marcas (carrito, checkout, pagos, cupones, pedidos, locales, carta), a una librería compartida. Dos personas, 3 meses.
+Migración, junto a otra persona, de los módulos base, los que siempre se repiten entre marcas (carrito, checkout, pagos, cupones, pedidos, locales, carta), a una librería compartida. Tres meses.
 
 La propuesta: hacer la migración con apoyo de la inteligencia artificial, con una arquitectura pensada para eso desde el inicio. El resultado es una forma de trabajo en la que cada equipo avanza con sus propias marcas sin pisarse con los demás.
 
