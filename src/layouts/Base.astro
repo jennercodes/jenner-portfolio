@@ -2,6 +2,7 @@
 import { Font, getImage } from 'astro:assets';
 import portrait from '../assets/jenner-acosta.png';
 import '../styles/global.css';
+import BottomNav from '../components/BottomNav.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { site } from '../data/site';
@@ -61,7 +62,7 @@ const jsonLd = {
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -121,7 +122,7 @@ const jsonLd = {
 
     <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
-  <body class="flex min-h-dvh flex-col bg-bg text-fg">
+  <body class="flex min-h-dvh flex-col bg-bg pb-[calc(4rem+env(safe-area-inset-bottom))] text-fg md:pb-0">
     <a
       href="#contenido"
       class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-btn-bg focus:px-4 focus:py-2 focus:text-btn-fg"
@@ -134,6 +135,7 @@ const jsonLd = {
       <slot />
     </main>
     <Footer />
+    <BottomNav />
     <div data-tui><p class="tui-loading">cargando ~/jenner.codes…</p></div>
     <script>
       import { isTerminal } from '../lib/mode';
