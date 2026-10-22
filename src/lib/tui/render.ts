@@ -6,7 +6,8 @@
 import type { Line, Token } from './types';
 
 export function isExternal(href: string): boolean {
-  return /^(https?:|mailto:|tel:)/.test(href);
+  // Las rutas absolutas (/charlas/…) son páginas sueltas: se abren en otra pestaña
+  return /^(https?:|mailto:|tel:|\/)/.test(href);
 }
 
 export function el<K extends keyof HTMLElementTagNameMap>(

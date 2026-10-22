@@ -51,6 +51,8 @@ export const talks: readonly Talk[] = [
     event: 'GitHub Community Day Perú',
     date: '2026-06-06',
     role: 'Speaker',
+    url: '/charlas/del-commit-al-deploy.html',
+    linkLabel: 'Slides',
   },
   {
     id: 'gdg-open-lima-2026',

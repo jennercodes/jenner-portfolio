@@ -4,7 +4,7 @@ role: Fullstack Developer
 start: 2023
 summary: Empezó como Phone Tool 360. Hoy es una plataforma que sigue creciendo.
 stack: [Laravel, Livewire, Alpine.js, MySQL]
-url: https://phonetool360.com
+url: https://profix360.com
 featured: true
 order: 5
 ---
