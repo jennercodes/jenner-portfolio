@@ -33,7 +33,6 @@ export const principles = [
 ] as const;
 
 export interface Talk {
-  /** Clave de la foto en src/pages/index.astro */
   id: string;
   title: string;
   event: string;
