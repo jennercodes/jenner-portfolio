@@ -1,0 +1,126 @@
+---
+import { principles, site, talks } from '../data/site';
+import { formatPeriod, getProyectos } from '../lib/proyectos';
+
+const proyectos = (await getProyectos()).map((p) => ({
+  id: p.id,
+  title: p.data.title,
+  summary: p.data.summary,
+  role: p.data.role,
+  period: formatPeriod(p.data),
+  stack: p.data.stack,
+}));
+
+const data = {
+  author: site.author,
+  role: site.role,
+  secondaryRole: site.secondaryRole,
+  location: site.location,
+  email: site.email,
+  whatsapp: site.whatsapp,
+  socials: site.socials,
+  principles,
+  talks,
+  proyectos,
+};
+
+const chips = ['help', 'proyectos', 'whoami', 'contacto'];
+---
+
+<!-- La terminal es oscura en ambos temas. Sin JS se muestra la sesión estática. -->
+<figure
+  data-terminal
+  data-reveal
+  class="m-0 flex flex-col overflow-hidden rounded-2xl border border-gray-800 bg-[#0e0e11] text-gray-50 transition-colors focus-within:border-blue-800"
+  aria-label="Terminal interactiva de jenner.codes"
+>
+  <div class="relative flex h-11 shrink-0 items-center justify-center border-b border-gray-800 bg-[#111114]">
+    <div class="absolute left-[18px] flex gap-2" aria-hidden="true">
+      <span class="size-3 rounded-full bg-gray-700"></span>
+      <span class="size-3 rounded-full bg-gray-700"></span>
+      <span class="size-3 rounded-full bg-gray-700"></span>
+    </div>
+    <span class="font-mono text-[13px] text-gray-400">~/jenner.codes</span>
+  </div>
+
+  <div
+    data-output
+    role="log"
+    aria-live="polite"
+    aria-label="Salida de la terminal"
+    class="flex max-h-[24rem] min-h-[18rem] flex-1 flex-col gap-2.5 overflow-y-auto [&>span]:pl-[3ch] [&>span]:-indent-[3ch] px-6 pt-7 pb-2 font-mono text-[14px] leading-relaxed [overflow-wrap:anywhere] sm:px-8 sm:text-[15px]"
+  >
+    <span><span class="text-blue-400">$</span>&nbsp; whoami</span>
+    <span class="text-gray-400">&nbsp;&nbsp; {site.author}</span>
+    <span class="text-gray-400">&nbsp;&nbsp; {site.role}</span>
+    <span><span class="text-blue-400">$</span>&nbsp; cat principios.md</span>
+    {
+      principles.map((p) => (
+        <span class="text-gray-400">
+          <span class="text-gray-500">✓</span>&nbsp; {p}
+        </span>
+      ))
+    }
+    <span data-hint hidden class="text-gray-500">&nbsp;&nbsp; Escribe help para ver los comandos.</span>
+  </div>
+
+  <div data-static-cursor class="px-6 pb-7 font-mono text-[15px] sm:px-8" aria-hidden="true">
+    <span class="text-blue-400">$</span>&nbsp;
+    <span class="cursor inline-block h-[18px] w-[9px] translate-y-[3px] bg-gray-400"></span>
+  </div>
+
+  <form data-form hidden class="flex items-center gap-3 px-6 pt-1 pb-6 font-mono text-[16px] sm:px-8 sm:text-[15px]">
+    <label for="terminal-input" class="sr-only">Escribe un comando de la terminal. Prueba con help.</label>
+    <span class="text-blue-400" aria-hidden="true">$</span>
+    <input
+      id="terminal-input"
+      data-input
+      type="text"
+      autocomplete="off"
+      autocapitalize="off"
+      autocorrect="off"
+      spellcheck="false"
+      enterkeyhint="send"
+      placeholder="help"
+      class="min-w-0 flex-1 bg-transparent text-gray-50 caret-blue-400 outline-none placeholder:text-gray-600 focus-visible:outline-none"
+    />
+  </form>
+
+  <div data-chips hidden class="flex flex-wrap gap-2 border-t border-gray-800 px-6 py-3 sm:px-8">
+    {
+      chips.map((c) => (
+        <button
+          type="button"
+          data-chip={c}
+          class="h-9 rounded-md border border-gray-800 bg-gray-900 px-3 font-mono text-[13px] text-gray-300 transition-colors hover:border-gray-700 hover:text-gray-50"
+        >
+          {c}
+        </button>
+      ))
+    }
+  </div>
+
+  <script type="application/json" data-terminal-data set:html={JSON.stringify(data)} />
+</figure>
+
+<style>
+  @media (prefers-reduced-motion: no-preference) {
+    .cursor {
+      animation: blink 1.1s steps(1) infinite;
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  import { createTerminal } from '../lib/terminal';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-terminal]')) {
+    createTerminal(root);
+  }
+</script>

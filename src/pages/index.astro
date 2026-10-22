@@ -1,22 +1,102 @@
 ---
-import Cover from '../components/elements/Cover.astro';
-import Layout from '../layouts/Layout.astro';
-import PortfolioGrid from '../components/portfolio/Grid.astro';
-import BlogGrid from '../components/blog/Grid.astro';
+import Crosshairs from '../components/Crosshairs.astro';
+import Header from '../components/Header.astro';
+import ProjectRow from '../components/ProjectRow.astro';
+import Terminal from '../components/Terminal.astro';
+import { site, talks } from '../data/site';
+import Base from '../layouts/Base.astro';
+import { getDestacados } from '../lib/proyectos';
+
+const destacados = await getDestacados();
+const dateFmt = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 ---
 
-<Layout>
-    <Cover
-        greeting="Hi, I'm Jenner 👋"
-        description="Software Developer passionate about crafting innovative solutions and delightful user experiences"
-        buttonText="Latest Projects"
-        buttonUrl="/portfolio"
-    />
-    <section class="w-11/12 max-w-6xl mx-auto">
-        <PortfolioGrid />
-        <section>
-            <h2 class="font-thin text-4xl">Blog</h2>
-            <BlogGrid lang="en" />
-        </section>
+<Base>
+  <div slot="hero" data-hero class="bg-blueprint relative overflow-hidden border-b border-line">
+    <Crosshairs />
+    <Header />
+    <section
+      class="relative mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 pt-20 pb-28 text-center sm:px-8 sm:pt-28 sm:pb-36"
+      aria-labelledby="hero-title"
+    >
+      <p data-hero-item class="font-mono text-xs tracking-[0.24em] text-muted uppercase"><span data-scramble>{site.location}</span></p>
+      <h1 id="hero-title" data-split class="text-6xl font-semibold tracking-[-0.05em] leading-[0.95] sm:text-8xl lg:text-display">
+        {site.author}
+      </h1>
+      <p data-hero-item class="font-mono text-[15px] leading-relaxed text-muted sm:text-[17px]">
+        <span data-scramble>{site.role}</span><span class="hidden text-subtle sm:inline"> · </span><br class="sm:hidden" /><span data-scramble>{site.secondaryRole}</span>
+      </p>
+      <div data-hero-item class="mt-3 flex flex-wrap items-center justify-center gap-6">
+        <a
+          href="/proyectos"
+          data-magnetic
+          class="inline-flex h-13 items-center rounded-xl bg-btn-bg px-6.5 text-base font-semibold text-btn-fg transition-opacity hover:opacity-90"
+        >
+          Ver proyectos
+        </a>
+        <a href="#contacto" data-magnetic class="inline-flex h-13 items-center gap-2 text-base font-medium text-muted transition-colors hover:text-fg">
+          Escríbeme <span aria-hidden="true">↗</span>
+        </a>
+      </div>
     </section>
-</Layout>
+  </div>
+
+  <section class="mx-auto grid max-w-6xl gap-6 px-4 py-14 sm:px-8 lg:grid-cols-2" aria-label="Principios y trabajo seleccionado">
+    <Terminal />
+    <div data-reveal class="bg-glow flex flex-col rounded-2xl border border-line px-6 py-7 sm:px-8">
+      <h2 class="mb-3 font-mono text-xs tracking-[0.16em] text-muted uppercase">Trabajo seleccionado</h2>
+      <ul data-stagger>
+        {destacados.map((p) => <ProjectRow proyecto={p} />)}
+      </ul>
+      <a href="/proyectos" class="mt-3 font-mono text-sm text-accent hover:text-accent-strong">Ver todos los proyectos →</a>
+    </div>
+  </section>
+
+  <section id="charlas" class="mx-auto max-w-6xl scroll-mt-8 px-4 py-14 sm:px-8" aria-labelledby="charlas-title">
+    <h2 id="charlas-title" data-reveal class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Charlas</h2>
+    <ul data-stagger class="mt-6">
+      {
+        talks.map((t) => (
+          <li class="flex flex-col gap-2 border-t border-line py-6">
+            <span class="text-2xl font-semibold tracking-[-0.02em]">{t.title}</span>
+            <span class="font-mono text-[13px] text-muted">
+              {t.event} · {dateFmt.format(new Date(t.date))}
+            </span>
+            <span class="font-mono text-[13px] text-muted">
+              {t.role}
+              {t.url && (
+                <>
+                  {' · '}
+                  <a href={t.url} target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-strong">
+                    {t.linkLabel ?? 'Recursos'} ↗
+                  </a>
+                </>
+              )}
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section id="contacto" class="mx-auto max-w-6xl scroll-mt-8 px-4 pt-14 pb-24 sm:px-8" aria-labelledby="contacto-title">
+    <div data-reveal class="bg-glow flex flex-col gap-8 rounded-2xl border border-line px-6 py-10 sm:px-12 sm:py-14 md:flex-row md:items-end md:justify-between">
+      <div class="flex max-w-xl flex-col gap-4">
+        <h2 id="contacto-title" class="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">¿Tienes un proyecto en mente?</h2>
+        <p class="text-lg leading-relaxed text-muted">
+          Cuéntame la idea, por grande que sea. Lo convertimos en algo simple y efectivo.
+        </p>
+      </div>
+      <div class="flex flex-col gap-3 font-mono text-[15px]">
+        <a
+          href={`mailto:${site.email}`}
+          data-magnetic
+          class="inline-flex h-13 items-center justify-center rounded-xl bg-btn-bg px-6 font-sans text-base font-semibold text-btn-fg transition-opacity hover:opacity-90"
+        >
+          {site.email}
+        </a>
+        <p class="text-center text-muted">WhatsApp · {site.whatsapp}</p>
+      </div>
+    </div>
+  </section>
+</Base>

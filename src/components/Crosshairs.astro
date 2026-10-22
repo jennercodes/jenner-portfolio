@@ -1,0 +1,22 @@
+---
+/* Cruces de "plano" en las esquinas del hero (decorativas) */
+const positions = [
+  'left-[18%] top-[22%]',
+  'right-[18%] top-[22%]',
+  'left-[18%] bottom-[16%]',
+  'right-[18%] bottom-[16%]',
+];
+---
+
+{
+  positions.map((pos) => (
+    <svg
+      data-cross
+      class:list={['pointer-events-none absolute hidden size-4 md:block', pos]}
+      viewBox="0 0 16 16"
+      aria-hidden="true"
+    >
+      <path d="M8 0v16M0 8h16" stroke="var(--cross)" stroke-width="1" />
+    </svg>
+  ))
+}

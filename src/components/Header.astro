@@ -1,0 +1,42 @@
+---
+import { nav } from '../data/site';
+import ModeToggle from './ModeToggle.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import Wordmark from './Wordmark.astro';
+
+const current = Astro.url.pathname.replace(/\.html$/, '');
+---
+
+<header class="[view-transition-name:site-header] mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-4 px-4 py-6 sm:px-8">
+  <Wordmark />
+  <nav aria-label="Principal">
+    <ul class="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[13px] sm:gap-x-8">
+      {
+        nav.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              aria-current={current === item.href ? 'page' : undefined}
+              class="text-muted transition-colors hover:text-fg aria-[current=page]:text-fg"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a
+          href="/#contacto"
+          data-magnetic
+          class="inline-flex h-9 items-center rounded-lg border border-subtle bg-surface px-3.5 text-fg transition-colors hover:border-muted"
+        >
+          Contacto
+        </a>
+      </li>
+      <li class="flex gap-2">
+        <ModeToggle />
+        <ThemeToggle />
+      </li>
+    </ul>
+  </nav>
+</header>

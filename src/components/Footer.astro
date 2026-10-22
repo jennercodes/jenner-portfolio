@@ -1,0 +1,26 @@
+---
+import { site } from '../data/site';
+import Wordmark from './Wordmark.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-line">
+  <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-12 sm:flex-row sm:items-end sm:justify-between sm:px-8">
+    <div class="flex flex-col gap-3">
+      <Wordmark />
+      <p class="font-mono text-[13px] text-muted">{site.location} · © {year}</p>
+    </div>
+    <ul class="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[13px]">
+      {
+        site.socials.map((s) => (
+          <li>
+            <a href={s.url} target="_blank" rel="noopener noreferrer" class="text-muted transition-colors hover:text-fg">
+              {s.label} <span aria-hidden="true">↗</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</footer>

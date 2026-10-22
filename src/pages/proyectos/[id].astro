@@ -1,0 +1,116 @@
+---
+import { render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Tag from '../../components/Tag.astro';
+import { site } from '../../data/site';
+import Base from '../../layouts/Base.astro';
+import { formatPeriod, getProyectos, type Proyecto } from '../../lib/proyectos';
+
+export const getStaticPaths = (async () => {
+  const proyectos = await getProyectos();
+  return proyectos.map((proyecto, i) => ({
+    params: { id: proyecto.id },
+    props: { proyecto, next: proyectos[(i + 1) % proyectos.length] },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  proyecto: Proyecto;
+  next: Proyecto;
+}
+
+const { proyecto, next } = Astro.props;
+const { title, role, client, summary, stack, personal, url } = proyecto.data;
+const { Content } = await render(proyecto);
+
+const period = formatPeriod(proyecto.data);
+const description = `${summary} Caso de estudio: ${role}, ${period}. ${stack.slice(0, 3).join(', ')}.`;
+const pageUrl = new URL(`/proyectos/${proyecto.id}`, site.url).href;
+const schema = [
+  {
+    '@type': 'CreativeWork',
+    name: title,
+    description: summary,
+    url: pageUrl,
+    image: new URL(`/og/proyectos/${proyecto.id}.png`, site.url).href,
+    author: { '@id': `${site.url}/#person` },
+    keywords: stack.join(', '),
+    inLanguage: 'es',
+    ...(url && { sameAs: url }),
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: site.url },
+      { '@type': 'ListItem', position: 2, name: 'Proyectos', item: `${site.url}/proyectos` },
+      { '@type': 'ListItem', position: 3, name: title, item: pageUrl },
+    ],
+  },
+];
+---
+
+<Base title={title} description={description} og={`proyectos/${proyecto.id}`} ogAlt={`${title}: ${summary}`} schema={schema}>
+  <article class="mx-auto max-w-6xl px-4 pt-12 pb-24 sm:px-8 sm:pt-20">
+    <a href="/proyectos" data-hero-item class="font-mono text-[13px] text-muted transition-colors hover:text-fg">← Proyectos</a>
+
+    <header class="mt-8 flex flex-col gap-6 border-b border-line pb-10">
+      <div class="flex flex-wrap items-center gap-4">
+        <h1 data-split class="text-5xl font-semibold tracking-[-0.04em] sm:text-7xl">{title}</h1>
+        {personal && <Tag>Proyecto personal</Tag>}
+      </div>
+      <p data-hero-item class="max-w-2xl text-xl leading-relaxed text-muted">{summary}</p>
+      <dl data-hero-item class="grid gap-x-10 gap-y-4 font-mono text-[13px] sm:grid-cols-[repeat(3,auto)] sm:justify-start">
+        <div class="flex flex-col gap-1">
+          <dt class="tracking-[0.12em] text-muted uppercase">Rol</dt>
+          <dd class="m-0 text-fg">{role}</dd>
+        </div>
+        <div class="flex flex-col gap-1">
+          <dt class="tracking-[0.12em] text-muted uppercase">Periodo</dt>
+          <dd class="m-0 text-fg">{formatPeriod(proyecto.data)}</dd>
+        </div>
+        {
+          client && (
+            <div class="flex flex-col gap-1">
+              <dt class="tracking-[0.12em] text-muted uppercase">Cliente</dt>
+              <dd class="m-0 text-fg">{client}</dd>
+            </div>
+          )
+        }
+      </dl>
+    </header>
+
+    <div class="mt-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div data-reveal class="prose-case max-w-2xl">
+        <Content />
+      </div>
+      <aside data-reveal class="flex flex-col gap-6 lg:sticky lg:top-8 lg:self-start">
+        <div class="flex flex-col gap-3">
+          <h2 class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Stack</h2>
+          <ul class="flex flex-wrap gap-2">
+            {
+              stack.map((s) => (
+                <li class="rounded-md border border-line bg-surface px-2.5 py-1 font-mono text-[12px] text-fg">{s}</li>
+              ))
+            }
+          </ul>
+        </div>
+        {
+          url && (
+            <a href={url} target="_blank" rel="noopener noreferrer" class="font-mono text-sm text-accent hover:text-accent-strong">
+              {new URL(url).hostname.replace(/^www\./, '')} ↗
+            </a>
+          )
+        }
+      </aside>
+    </div>
+
+    <nav data-reveal class="mt-20 border-t border-line pt-8" aria-label="Siguiente proyecto">
+      <a href={`/proyectos/${next.id}`} class="group flex flex-col gap-2">
+        <span class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Siguiente</span>
+        <span class="text-3xl font-semibold tracking-[-0.03em] transition-colors group-hover:text-accent">
+          {next.data.title} →
+        </span>
+      </a>
+    </nav>
+  </article>
+</Base>

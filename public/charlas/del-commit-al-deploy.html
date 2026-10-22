@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Del commit al deploy — Jenner Acosta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cyan:#00FFFF;
+    --bg:#070B0F;
+    --bg2:#0B1219;
+    --panel:#0E1620;
+    --line:#15212E;
+    --dim:#3A4D5C;
+    --text:#C7D6E0;
+    --white:#EAF6FB;
+    --magenta:#FF4FD8;
+    --amber:#FF9A3C;
+    --green:#3CFFA0;
+    --red:#FF4F6D;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Space Mono',monospace;
+    cursor:none;
+  }
+  /* circuit + grid background */
+  .bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .grid{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(0,255,255,.035) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,255,255,.035) 1px,transparent 1px);
+    background-size:46px 46px;
+    mask-image:radial-gradient(ellipse 80% 70% at 50% 45%,#000 30%,transparent 95%);
+  }
+  .glow{
+    position:absolute;border-radius:50%;filter:blur(120px);opacity:.22;
+  }
+  .glow.a{width:520px;height:520px;background:var(--cyan);top:-160px;left:-120px}
+  .glow.b{width:460px;height:460px;background:var(--magenta);bottom:-180px;right:-120px;opacity:.16}
+  .scanline{
+    position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0px,rgba(255,255,255,.012) 1px,transparent 2px,transparent 4px);
+    mix-blend-mode:overlay;
+  }
+  .noise{
+    position:absolute;inset:0;opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* custom cursor */
+  .cursor{
+    position:fixed;width:22px;height:22px;border:1.5px solid var(--cyan);
+    border-radius:50%;z-index:9999;pointer-events:none;
+    transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s;
+    mix-blend-mode:difference;
+  }
+  .cursor.dot{width:5px;height:5px;background:var(--cyan);border:none}
+
+  /* deck */
+  .deck{position:relative;z-index:2;height:100%;width:100%}
+  .slide{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:6vh 8vw;
+    opacity:0;visibility:hidden;
+    transform:translateY(24px) scale(.99);
+    transition:opacity .5s ease,transform .5s ease,visibility .5s;
+    overflow-y:auto;
+  }
+  .slide.active{opacity:1;visibility:visible;transform:none}
+  .slide::-webkit-scrollbar{width:6px}
+  .slide::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+
+  /* shared type */
+  .kicker{
+    font-size:.78rem;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--cyan);margin-bottom:1.4rem;display:flex;align-items:center;gap:.7rem;
+  }
+  .kicker::before{content:'';width:28px;height:1px;background:var(--cyan);display:inline-block}
+  h1{
+    font-family:'Syne',sans-serif;font-weight:800;color:var(--white);
+    font-size:clamp(2.4rem,6vw,5rem);line-height:.98;letter-spacing:-.02em;
+  }
+  h2{
+    font-family:'Syne',sans-serif;font-weight:800;color:var(--white);
+    font-size:clamp(1.8rem,4vw,3rem);line-height:1.05;letter-spacing:-.01em;
+    margin-bottom:1.8rem;
+  }
+  .accent{color:var(--cyan)}
+  .mag{color:var(--magenta)}
+  .amber{color:var(--amber)}
+  .green{color:var(--green)}
+  p{font-size:clamp(.95rem,1.5vw,1.15rem);line-height:1.7;max-width:60ch}
+  .lead{font-size:clamp(1.05rem,1.8vw,1.35rem);color:var(--text);max-width:64ch}
+
+  /* terminal block */
+  .term{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    font-size:clamp(.78rem,1.2vw,.95rem);overflow:hidden;
+    box-shadow:0 24px 60px -30px rgba(0,255,255,.25);max-width:760px;
+  }
+  .term-bar{
+    display:flex;align-items:center;gap:.5rem;padding:.7rem 1rem;
+    background:var(--bg2);border-bottom:1px solid var(--line);
+  }
+  .term-bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .term-bar i:nth-child(1){background:#FF5F57}
+  .term-bar i:nth-child(2){background:#FEBC2E}
+  .term-bar i:nth-child(3){background:#28C840}
+  .term-bar span{margin-left:.6rem;color:var(--dim);font-size:.75rem}
+  .term-body{padding:1.2rem 1.3rem;line-height:1.85}
+  .term-body .prompt{color:var(--cyan)}
+  .term-body .cmd{color:var(--white)}
+  .term-body .out{color:var(--dim)}
+  .term-body .ok{color:var(--green)}
+  .term-body .warn{color:var(--amber)}
+
+  /* interactive flow */
+  .flow{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1.8rem;max-width:900px;align-items:center}
+  .fnode{
+    border:1px solid var(--line);background:var(--panel);border-radius:8px;
+    padding:.65rem .95rem;font-size:.82rem;color:var(--text);cursor:none;
+    position:relative;transition:all .3s;opacity:.4;transform:translateY(6px);
+  }
+  .fnode .b{color:var(--cyan);font-weight:700}
+  .fnode.human{border-color:rgba(255,79,216,.4)}
+  .fnode.human .b{color:var(--magenta)}
+  .fnode.lit{opacity:1;transform:none;box-shadow:0 0 18px -4px var(--cyan)}
+  .fnode.human.lit{box-shadow:0 0 18px -4px var(--magenta)}
+  .fnode.sel{background:var(--bg2);border-color:var(--cyan);transform:translateY(-3px) scale(1.04)}
+  .fnode.human.sel{border-color:var(--magenta)}
+  .fnode:hover{opacity:1;border-color:var(--cyan)}
+  .farr{color:var(--dim);font-size:.95rem;opacity:.4;transition:opacity .3s}
+  .farr.lit{opacity:1;color:var(--cyan)}
+  .flow-detail{
+    margin-top:1.6rem;border:1px solid var(--line);border-left:3px solid var(--cyan);
+    background:var(--panel);border-radius:8px;padding:1.1rem 1.3rem;max-width:780px;
+    font-size:.92rem;line-height:1.6;min-height:64px;transition:border-color .3s;
+  }
+  .flow-detail.human{border-left-color:var(--magenta)}
+  .flow-detail b{color:var(--white)}
+
+  /* cards grid */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-top:1.4rem;max-width:980px}
+  .card{
+    border:1px solid var(--line);background:linear-gradient(160deg,var(--panel),var(--bg2));
+    border-radius:12px;padding:1.4rem;position:relative;overflow:hidden;
+    transition:transform .25s,border-color .25s;
+  }
+  .card:hover{transform:translateY(-4px);border-color:var(--cyan)}
+  .card::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:var(--cyan);opacity:.4}
+  .card h3{font-family:'Syne',sans-serif;color:var(--white);font-size:1.1rem;margin-bottom:.6rem}
+  .card p{font-size:.88rem;line-height:1.6}
+  .card .tag{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan);display:block;margin-bottom:.7rem}
+
+  /* criticality bars */
+  .crit{display:flex;flex-direction:column;gap:.8rem;margin-top:1.6rem;max-width:760px}
+  .crit-row{display:flex;align-items:center;gap:1rem;border:1px solid var(--line);border-radius:8px;padding:.9rem 1.1rem;background:var(--panel)}
+  .crit-tag{font-weight:700;padding:.25rem .7rem;border-radius:5px;font-size:.8rem;min-width:54px;text-align:center}
+  .p0{background:rgba(255,79,109,.15);color:var(--red);border:1px solid var(--red)}
+  .p1{background:rgba(255,154,60,.15);color:var(--amber);border:1px solid var(--amber)}
+  .p2{background:rgba(60,255,160,.15);color:var(--green);border:1px solid var(--green)}
+  .crit-row p{font-size:.88rem;margin:0}
+
+  /* big quote */
+  .quote{
+    border-left:3px solid var(--cyan);padding:1.4rem 0 1.4rem 2rem;max-width:70ch;
+    font-size:clamp(1.2rem,2.4vw,2rem);line-height:1.4;color:var(--white);
+    font-family:'Syne',sans-serif;font-weight:600;
+  }
+
+  /* title slide with logos */
+  .title-slide{justify-content:space-between;padding:7vh 8vw}
+  .title-main{display:flex;flex-direction:column;justify-content:center;flex:1}
+  .cover-foot{display:flex;align-items:center;gap:clamp(1.2rem,4vw,3rem);padding-top:2rem;border-top:1px solid var(--line);flex-wrap:wrap}
+  .cover-dsc{display:flex;align-items:center;gap:1rem}
+  .cover-dsc svg{width:30px;height:30px;color:var(--white);flex-shrink:0}
+  .cover-dsc .dsc-1{font-family:'Syne',sans-serif;font-weight:700;color:var(--white);font-size:clamp(1rem,2vw,1.4rem);line-height:1.1}
+  .cover-dsc .dsc-2{font-size:.78rem;color:var(--dim);margin-top:.2rem}
+  .cover-div{width:1px;height:38px;background:var(--line)}
+  .cover-gh{display:flex;align-items:center;gap:.7rem}
+  .cover-gh svg{width:38px;height:38px;color:var(--white)}
+  .cover-gh span{font-family:'Syne',sans-serif;font-weight:800;color:var(--white);font-size:clamp(1.4rem,3vw,2rem)}
+
+  /* thanks */
+  .thanks h1{font-size:clamp(3rem,11vw,9rem);line-height:.9}
+  .thanks .sub{font-size:1.1rem;color:var(--dim);margin-top:1.6rem;letter-spacing:.1em}
+  .social{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.7rem 1rem;margin-top:2.4rem;font-size:.95rem}
+  .social a{color:var(--text);text-decoration:none;transition:color .2s;display:inline-flex;align-items:center;gap:.5rem}
+  .social a svg{width:18px;height:18px;flex-shrink:0;color:var(--cyan)}
+  .social a:hover{color:var(--cyan)}
+  .social .sep{color:var(--dim)}
+
+  /* HUD */
+  .hud{position:fixed;bottom:2.2vh;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:0 8vw;pointer-events:none}
+  .hud .meta{font-size:.72rem;color:var(--dim);letter-spacing:.18em;text-transform:uppercase}
+  .hud .meta b{color:var(--cyan)}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--cyan);z-index:60;transition:width .5s ease;box-shadow:0 0 12px var(--cyan)}
+  .nav-hint{position:fixed;bottom:2.2vh;left:50%;transform:translateX(-50%);z-index:50;font-size:.7rem;color:var(--dim);letter-spacing:.15em}
+  .nav-hint b{color:var(--text)}
+  .dots{position:fixed;right:2.4vw;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:.7rem}
+  .dots button{width:9px;height:9px;border-radius:50%;border:1px solid var(--dim);background:transparent;cursor:none;padding:0;transition:all .25s}
+  .dots button.on{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+
+  .blink{animation:blink 1.1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .reveal{opacity:0;transform:translateY(18px)}
+  .slide.active .reveal{animation:up .6s forwards}
+  .slide.active .reveal:nth-child(1){animation-delay:.1s}
+  .slide.active .reveal:nth-child(2){animation-delay:.2s}
+  .slide.active .reveal:nth-child(3){animation-delay:.3s}
+  .slide.active .reveal:nth-child(4){animation-delay:.4s}
+  .slide.active .reveal:nth-child(5){animation-delay:.5s}
+  .slide.active .reveal:nth-child(6){animation-delay:.6s}
+  @keyframes up{to{opacity:1;transform:none}}
+
+  .tag-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.4rem}
+  .chip{font-size:.74rem;border:1px solid var(--line);border-radius:20px;padding:.35rem .9rem;color:var(--dim)}
+  .chip.on{color:var(--cyan);border-color:var(--cyan)}
+
+  @media(max-width:640px){
+    .slide{padding:8vh 6vw}
+    .hud{padding:0 6vw}
+    .dots{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="bg-layer">
+  <div class="grid"></div>
+  <div class="glow a"></div>
+  <div class="glow b"></div>
+  <div class="scanline"></div>
+  <div class="noise"></div>
+</div>
+<div class="cursor" id="cursor"></div>
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 — TITLE -->
+  <section class="slide active title-slide">
+    <div class="title-main reveal">
+      <div class="kicker">GitHub Community Day · Perú</div>
+      <h1>Del commit<br>al <span class="accent">deploy</span></h1>
+      <p class="lead" style="margin-top:1.6rem">Flujos de trabajo modernos con <span class="accent">GitHub</span> y <span class="accent">Claude</span>. Cómo integrar IA en tu pipeline sin perder el control de las decisiones que importan.</p>
+      <div class="tag-row">
+        <span class="chip on">Claude Code</span>
+        <span class="chip on">GitHub CLI</span>
+        <span class="chip on">GitHub Actions</span>
+      </div>
+      <div style="margin-top:1.8rem;font-size:.85rem;color:var(--dim)">
+        <span class="accent">›</span> C. Jenner Acosta Díaz · Senior Frontend Engineer<span class="blink">_</span>
+      </div>
+    </div>
+    <div class="cover-foot reveal">
+      <div class="cover-dsc">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="17" x2="18" y2="17"/></svg>
+        <div>
+          <div class="dsc-1">Developer Student Clubs</div>
+          <div class="dsc-2">Universidad Tecnológica del Perú</div>
+        </div>
+      </div>
+      <div class="cover-div"></div>
+      <div class="cover-gh">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.82.58A12 12 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z"/></svg>
+        <span>GitHub</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 — THE IDEA -->
+  <section class="slide">
+    <div class="kicker reveal">La idea</div>
+    <h2 class="reveal">No le dictes cada paso.<br>Dale <span class="accent">contexto</span> y <span class="accent">objetivo</span>.</h2>
+    <div class="grid2 reveal" style="margin-top:1rem">
+      <div class="card">
+        <span class="tag amber" style="color:var(--amber)">Dictar cada paso</span>
+        <h3>Frágil y lento</h3>
+        <p>Especificas el "cómo" exacto. Cambia el requerimiento y reescribes todo. El agente repite tus errores al pie de la letra.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Dar contexto + objetivo</span>
+        <h3>Flexible y rápido</h3>
+        <p>Defines el "qué" y el "por qué". El contexto del proyecto vive en CLAUDE.md y skills. El agente razona el "cómo"; tú validas.</p>
+      </div>
+    </div>
+    <div class="quote reveal" style="margin-top:1.6rem">La IA no reemplaza tu criterio.<br>Lo <span class="accent">amplifica</span> con el contexto correcto.</div>
+  </section>
+
+  <!-- 3 — THE MAP -->
+  <section class="slide" id="slide-map">
+    <div class="kicker reveal">El recorrido</div>
+    <h2 class="reveal">Un solo flujo, de punta a punta</h2>
+    <p class="reveal">Cada etapa tiene un colaborador de IA. Ninguna toma una decisión irreversible sin un humano. <span class="mag">Toca cada nodo</span> — los magenta son tuyos.</p>
+    <div class="flow reveal" id="flow"></div>
+    <div class="flow-detail reveal" id="flowDetail">
+      <span class="accent">›</span> Selecciona un nodo del flujo para ver qué pasa en cada etapa.<span class="blink">_</span>
+    </div>
+    <p class="reveal" style="margin-top:1.4rem;font-size:.9rem;color:var(--dim)">El LLM ejecuta rapidísimo. Pero el humano es dueño de la decisión en <span class="mag">3 momentos críticos</span>: plan, commit, merge.</p>
+  </section>
+
+  <!-- 4 — DEMO START -->
+  <section class="slide">
+    <div class="kicker reveal">Demo en vivo</div>
+    <h2 class="reveal">Menos diapositivas.<br>Más <span class="accent">terminal</span>.</h2>
+    <p class="reveal">Lo que sigue lo construí en una sola sesión. Vamos a recorrerlo en vivo, paso a paso, de la rama limpia al merge.</p>
+    <div class="term reveal" style="margin-top:1.2rem">
+      <div class="term-bar"><i></i><i></i><i></i><span>~/projects/demo — claude</span></div>
+      <div class="term-body">
+        <div><span class="prompt">$</span> <span class="cmd">git status</span></div>
+        <div class="out">On branch main · nothing to commit, working tree clean</div>
+        <div><span class="prompt">$</span> <span class="cmd">claude</span></div>
+        <div class="ok">✓ Claude Code · CLAUDE.md cargado · skills: brand-voice, content-schema</div>
+        <div class="out">› Listo. Trabajemos un cambio real.<span class="blink">_</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 — PLAN FIRST -->
+  <section class="slide">
+    <div class="kicker reveal">Momento humano #1 · plan</div>
+    <h2 class="reveal">Primero el plan.<br><span class="accent">Después</span> el código.</h2>
+    <div class="grid2 reveal" style="margin-top:1rem">
+      <div class="card">
+        <span class="tag">Plan Mode</span>
+        <h3>El approach, antes de ejecutar</h3>
+      </div>
+      <div class="card">
+        <span class="tag">Skills + CLAUDE.md</span>
+        <h3>El contexto que lo hace tuyo</h3>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 — CODE + COMMIT -->
+  <section class="slide">
+    <div class="kicker reveal">Momento humano #2 · commit</div>
+    <h2 class="reveal">El mensaje de commit deja de ser<br>una tarea. Es un <span class="accent">subproducto</span>.</h2>
+    <div class="term reveal">
+      <div class="term-bar"><i></i><i></i><i></i><span>WorkflowSection · +120 LOC</span></div>
+      <div class="term-body">
+        <div class="out">+ WorkflowSection.astro (120 LOC)</div>
+        <div class="out">+ content.json · Zod schema · 3 iconos · ~100 LOC CSS</div>
+        <div><span class="prompt">›</span> <span class="cmd">build verify</span> <span class="ok">✓ passed</span></div>
+        <div><span class="prompt">$</span> <span class="cmd">git commit -m "feat: add workflow section"</span></div>
+        <div class="ok">✓ f65dfda · Conventional Commits</div>
+        <div class="warn">↳ la regla "ask before commit" persiste entre sesiones — la conversación no empezó de cero</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 — PR + SELF REVIEW (STAR) -->
+  <section class="slide">
+    <div class="kicker reveal">El momento que lo justifica todo</div>
+    <h2 class="reveal">Se revisó a sí mismo<br>y encontró un <span class="mag">bug real</span>.</h2>
+    <p class="reveal">Un botón "restaurar" enfocable pero sin acción asociada: un problema de accesibilidad, no un detalle cosmético. Un PR sin esta revisión lo habría mandado directo a producción.</p>
+    <div class="quote reveal">Claude no aprueba solo. Ve el punto ciego que el autor del código no ve.<br>La decisión de merge sigue siendo <span class="accent">humana</span>.</div>
+  </section>
+
+  <!-- 8 — CRITICALITY -->
+  <section class="slide">
+    <div class="kicker reveal">El anti-patrón que evitamos</div>
+    <h2 class="reveal">No todo va al<br><span class="amber">mismo</span> PR.</h2>
+    <div class="crit reveal" style="margin-top:1.8rem">
+      <div class="crit-row"><span class="crit-tag p0">P0</span><p><b>Bloqueante</b> → issue urgente</p></div>
+      <div class="crit-row"><span class="crit-tag p1">P1</span><p><b>Importante</b> → issue + sprint</p></div>
+      <div class="crit-row"><span class="crit-tag p2">P2</span><p><b>Cosmético</b> → fix ahora</p></div>
+    </div>
+  </section>
+
+  <!-- 9 — HONESTY / GAPS -->
+  <section class="slide">
+    <div class="kicker reveal">Dónde el flujo aún falla</div>
+    <h2 class="reveal">Funcionó. Pero <span class="amber">no</span> fue perfecto.</h2>
+    <div class="grid2 reveal">
+      <div class="card">
+        <span class="tag amber" style="color:var(--amber)">Gap real</span>
+        <h3>No lo vi en el navegador</h3>
+        <p>Solo verifiqué el HTML compilado. Un bug visual — un sticky roto en móvil, un contraste pobre — habría pasado invisible al diff.</p>
+      </div>
+      <div class="card">
+        <span class="tag amber" style="color:var(--amber)">Gap real</span>
+        <h3>El autor revisándose a sí mismo</h3>
+        <p>Aprobé mi propio approach en el primer pase. Hace falta un <span class="accent">agente fresh</span>, sin contexto previo, para un sesgo cercano a cero.</p>
+      </div>
+    </div>
+    <p class="reveal" style="margin-top:1.6rem;font-size:.92rem;color:var(--dim)">Si los tres momentos humanos se vuelven automáticos, perdiste el filtro.</p>
+  </section>
+
+  <!-- 10 — THANKS -->
+  <section class="slide thanks" style="align-items:center;text-align:center">
+    <h1 class="reveal">Gracias<span class="accent">.</span></h1>
+    <p class="sub reveal" style="margin-top:1.4rem">Workflow real con AI <span class="accent">≠</span> "el AI hace todo".</p>
+    <div class="social reveal">
+      <a href="https://jenner.codes" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        jenner.codes
+      </a>
+      <span class="sep">·</span>
+      <a href="https://github.com/jennercodes" target="_blank">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.82.58A12 12 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z"/></svg>
+        github.com/jennercodes
+      </a>
+      <span class="sep">·</span>
+      <a href="https://medium.com/@jenner.codes" target="_blank">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.54 12a6.8 6.8 0 0 1-6.77 6.82A6.8 6.8 0 0 1 0 12a6.8 6.8 0 0 1 6.77-6.82A6.8 6.8 0 0 1 13.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42S20.96 8.46 20.96 12zM24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/></svg>
+        @jenner.codes
+      </a>
+      <span class="sep">·</span>
+      <a href="https://www.instagram.com/jenner.codes/" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg>
+        @jenner.codes
+      </a>
+    </div>
+    <div class="reveal" style="margin-top:2.6rem;font-size:.75rem;color:var(--dim);letter-spacing:.18em">
+      GITHUB COMMUNITY DAY 2026<span class="blink">_</span>
+    </div>
+  </section>
+
+</div>
+
+<div class="dots" id="dots"></div>
+<div class="hud">
+  <span class="meta">Del commit al <b>deploy</b></span>
+  <span class="meta">SLIDE <b id="cur">01</b> / <span id="tot">12</span></span>
+</div>
+<div class="nav-hint">usa <b>← →</b> o <b>espacio</b> · <b>F</b> pantalla completa</div>
+
+<script nonce="MTcwNjEyMTgyMCwxOTgyNzM0OTk5">
+  const slides=[...document.querySelectorAll('.slide')];
+  const total=slides.length;
+  let i=0;
+  const progress=document.getElementById('progress');
+  const cur=document.getElementById('cur');
+  document.getElementById('tot').textContent=String(total).padStart(2,'0');
+  const dotsWrap=document.getElementById('dots');
+  slides.forEach((_,n)=>{
+    const b=document.createElement('button');
+    if(n===0)b.classList.add('on');
+    b.addEventListener('click',()=>go(n));
+    dotsWrap.appendChild(b);
+  });
+  const dots=[...dotsWrap.children];
+
+  function go(n){
+    if(n<0||n>=total)return;
+    slides[i].classList.remove('active');
+    dots[i].classList.remove('on');
+    i=n;
+    slides[i].classList.add('active');
+    dots[i].classList.add('on');
+    progress.style.width=((i)/(total-1)*100)+'%';
+    cur.textContent=String(i+1).padStart(2,'0');
+    if(slides[i].id==='slide-map')animateFlow();
+  }
+  function next(){go(i+1)}
+  function prev(){go(i-1)}
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();next()}
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev()}
+    if(e.key==='Home')go(0);
+    if(e.key==='End')go(total-1);
+    if(e.key.toLowerCase()==='f'){
+      if(!document.fullscreenElement)document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  // swipe
+  let sx=0;
+  document.addEventListener('touchstart',e=>sx=e.touches[0].clientX);
+  document.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    if(dx<-50)next();if(dx>50)prev();
+  });
+
+  // custom cursor
+  const cur2=document.getElementById('cursor');
+  document.addEventListener('mousemove',e=>{
+    cur2.style.left=e.clientX+'px';cur2.style.top=e.clientY+'px';
+  });
+  document.addEventListener('mousedown',()=>cur2.classList.add('dot'));
+  document.addEventListener('mouseup',()=>cur2.classList.remove('dot'));
+  // interactive flow (slide 3)
+  const flowSteps=[
+    {k:'plan',human:true,d:'<b>Momento humano.</b> "Explícame qué vas a tocar antes de hacerlo." El plan es barato; deshacer 200 líneas no.'},
+    {k:'explicar',d:'Claude propone el approach y los archivos que tocará. Tú apruebas antes de que escriba una sola línea.'},
+    {k:'código',d:'Genera el componente, el schema y los estilos siguiendo la voz del proyecto cargada en sus skills.'},
+    {k:'build verify',d:'Corre el build localmente para confirmar que compila antes de versionar nada.'},
+    {k:'commit',human:true,d:'<b>Momento humano.</b> Mensaje en Conventional Commits — ya no una tarea, sino un subproducto. La regla "ask before commit" persiste entre sesiones.'},
+    {k:'push',d:'Sube la rama feature usando la GitHub CLI, sin salir de la terminal.'},
+    {k:'PR',d:'Abre el Pull Request con descripción rica: qué cambió, por qué, y qué debe revisar un humano.'},
+    {k:'self-review',d:'Actúa como reviewer senior sobre su propio diff. Aquí apareció el bug de accesibilidad real.'},
+    {k:'issues + fix',d:'Separa criticidad: P0/P1 → issues con repro; P2 → fix inmediato. Sin "claudada" de mergear todo junto.'},
+    {k:'merge',human:true,d:'<b>Momento humano.</b> La decisión final de integrar a producción siempre es tuya.'}
+  ];
+  const flow=document.getElementById('flow');
+  const flowDetail=document.getElementById('flowDetail');
+  if(flow){
+    flowSteps.forEach((s,n)=>{
+      const el=document.createElement('button');
+      el.className='fnode'+(s.human?' human':'');
+      el.innerHTML='<span class="b">'+s.k+'</span>';
+      el.addEventListener('click',()=>selectNode(n));
+      flow.appendChild(el);
+      if(n<flowSteps.length-1){
+        const a=document.createElement('span');
+        a.className='farr';a.textContent='→';
+        flow.appendChild(a);
+      }
+    });
+    var fnodes=[...flow.querySelectorAll('.fnode')];
+    var farrs=[...flow.querySelectorAll('.farr')];
+  }
+  function selectNode(n){
+    fnodes.forEach(x=>x.classList.remove('sel'));
+    fnodes[n].classList.add('sel');
+    const s=flowSteps[n];
+    flowDetail.classList.toggle('human',!!s.human);
+    flowDetail.innerHTML='<span class="'+(s.human?'mag':'accent')+'">›</span> '+s.d;
+  }
+  let flowAnimated=false;
+  function animateFlow(){
+    if(flowAnimated||!flow)return;flowAnimated=true;
+    fnodes.forEach((el,n)=>{
+      setTimeout(()=>{
+        el.classList.add('lit');
+        if(farrs[n])farrs[n].classList.add('lit');
+      },180*n);
+    });
+  }
+</script>
+</body>
+</html>

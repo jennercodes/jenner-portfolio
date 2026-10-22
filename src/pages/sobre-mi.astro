@@ -1,0 +1,77 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../assets/jenner-acosta.png';
+import { about, site } from '../data/site';
+import Base from '../layouts/Base.astro';
+
+const { paragraphs, trayectoria, formacion } = about;
+
+const schema = [
+  {
+    '@type': 'ProfilePage',
+    name: 'Sobre mí',
+    url: `${site.url}/sobre-mi`,
+    inLanguage: 'es',
+    mainEntity: { '@id': `${site.url}/#person` },
+  },
+];
+---
+
+<Base
+  title="Sobre mí"
+  description="De docente de tecnología a Senior Frontend Engineer en Delosi. La historia y la forma de trabajar de Jenner Acosta."
+  og="sobre-mi"
+  schema={schema}
+>
+  <article class="mx-auto max-w-6xl px-4 pt-12 pb-24 sm:px-8 sm:pt-20">
+    <p data-hero-item class="font-mono text-xs tracking-[0.16em] text-muted uppercase">{site.location}</p>
+    <h1 data-split class="mt-4 text-5xl font-semibold tracking-[-0.04em] sm:text-7xl">Sobre mí</h1>
+
+    <div class="mt-12 grid gap-16 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div data-stagger class="prose-case max-w-2xl">
+        {paragraphs.map((p) => <p>{p}</p>)}
+      </div>
+
+      <aside class="flex flex-col gap-12">
+        <figure data-reveal class="bg-glow m-0 overflow-hidden rounded-2xl border border-line">
+          <Image
+            src={portrait}
+            alt={`Retrato de ${site.author}`}
+            widths={[380, 760]}
+            sizes="(min-width: 1024px) 380px, 100vw"
+            loading="eager"
+            class="aspect-square w-full object-cover"
+          />
+        </figure>
+        <section aria-labelledby="trayectoria-title">
+          <h2 id="trayectoria-title" class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Trayectoria</h2>
+          <ol data-stagger class="mt-4">
+            {
+              trayectoria.map((t) => (
+                <li class="flex flex-col gap-1 border-t border-line py-3">
+                  <span class="font-mono text-[12px] text-muted">{t.periodo}</span>
+                  <span class="font-semibold">{t.rol}</span>
+                  <span class="text-[15px] text-muted">{t.lugar}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </section>
+        <section aria-labelledby="formacion-title">
+          <h2 id="formacion-title" class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Formación</h2>
+          <ol data-stagger class="mt-4">
+            {
+              formacion.map((f) => (
+                <li class="flex flex-col gap-1 border-t border-line py-3">
+                  <span class="font-mono text-[12px] text-muted">{f.periodo}</span>
+                  <span class="font-semibold">{f.titulo}</span>
+                  <span class="text-[15px] text-muted">{f.lugar}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </section>
+      </aside>
+    </div>
+  </article>
+</Base>
