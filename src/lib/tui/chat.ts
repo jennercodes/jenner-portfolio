@@ -78,10 +78,16 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
 
   // ── Índices para entender preguntas ─────────────────────
 
-  const STOP = new Set(['visual', 'tool', 'los', 'las']);
+  const STOP = new Set(['visual', 'tool', 'los', 'las', 'online', 'music']);
+  /** Nombres que no están en el título del proyecto */
+  const PROJECT_ALIASES: Record<string, string[]> = {
+    rockass: ['rabanes', 'mirlos', 'chicas dulces', 'rom label'],
+    profix: ['phonetool', 'phone tool'],
+  };
   const projectKeys = data.proyectos.map((p) => ({
     p,
     keys: [
+      ...(PROJECT_ALIASES[p.id] ?? []),
       ...p.id.split('-'),
       ...normalize(p.title)
         .split(/[^a-z0-9]+/)
@@ -285,7 +291,7 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
           ]),
       ],
       [
-        /contact|email|correo|mail|whatsapp|escrib|contrat|hablar|presupuesto|cotiz|llamar|redes|github|linkedin|instagram|youtube/,
+        /contact|email|correo|mail|whatsapp|escrib|contrat|hablar|presupuesto|cotiz|cobr|precio|costo|tarifa|llamar|redes|github|linkedin|instagram|youtube/,
         () => read(doc('contacto.md')),
       ],
       [/charla|conferencia|talk|speaker|ponencia|evento|gdg/, () => read(doc('charlas.md'))],
@@ -295,7 +301,7 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
       ],
       [/stack|tecnolog|herramienta|lenguaje|framework/, () => byStack('')],
       [
-        /quien|sobre ti|sobre el|historia|experiencia|trayectoria|estudi|formacion|carrera|about|edad|donde/,
+        /quien|sobre ti|sobre el|sobre mi|historia|experiencia|trayectoria|estudi|formacion|carrera|about|edad|donde/,
         () => read(doc('sobre-mi.md')),
       ],
       [

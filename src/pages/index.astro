@@ -84,7 +84,7 @@ const dateFmt = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric
       <div class="flex max-w-xl flex-col gap-4">
         <h2 id="contacto-title" class="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">¿Tienes un proyecto en mente?</h2>
         <p class="text-lg leading-relaxed text-muted">
-          Cuéntame la idea, por grande que sea. Lo convertimos en algo simple y efectivo.
+          Cuéntame la idea y lo conversamos.
         </p>
       </div>
       <div class="flex flex-col gap-3 font-mono text-[15px]">
@@ -95,7 +95,9 @@ const dateFmt = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric
         >
           {site.email}
         </a>
-        <p class="text-center text-muted">WhatsApp · {site.whatsapp}</p>
+        <a href={site.whatsappUrl} target="_blank" rel="noopener noreferrer" class="text-center text-muted transition-colors hover:text-fg">
+          WhatsApp · {site.whatsapp} <span aria-hidden="true">↗</span>
+        </a>
       </div>
     </div>
   </section>

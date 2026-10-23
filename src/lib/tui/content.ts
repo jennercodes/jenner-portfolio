@@ -87,10 +87,10 @@ function contacto(data: TuiData): string {
   return [
     '# Contacto',
     '',
-    '¿Tienes un proyecto en mente? Cuéntame la idea, por grande que sea.',
+    '¿Tienes un proyecto en mente? Cuéntame la idea y lo conversamos.',
     '',
     `- email     [${site.email}](mailto:${site.email})`,
-    `- whatsapp  \`${site.whatsapp}\``,
+    `- whatsapp  [${site.whatsapp}](${site.whatsappUrl})`,
     ...site.socials.map(
       (s) =>
         `- ${s.label.toLowerCase().padEnd(9, ' ')} [${s.url.replace(/^https?:\/\/(www\.)?/, '')}](${s.url})`,

@@ -14,7 +14,8 @@ function inline(text: string, base: Omit<Token, 'text'> = {}): Token[] {
   for (const m of text.matchAll(INLINE)) {
     const index = m.index ?? 0;
     if (index > last) tokens.push({ ...base, text: text.slice(last, index) });
-    if (m[1] !== undefined) tokens.push({ ...base, text: m[1], tone: 'fg', bold: true });
+    // La negrita puede envolver un enlace: **[texto](url)**
+    if (m[1] !== undefined) tokens.push(...inline(m[1], { ...base, tone: 'fg', bold: true }));
     else if (m[2] !== undefined) tokens.push({ ...base, text: m[2], tone: 'code' });
     else tokens.push({ text: m[3], href: m[4] });
     last = index + m[0].length;

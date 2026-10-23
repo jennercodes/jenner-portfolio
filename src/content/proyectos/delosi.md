@@ -4,14 +4,14 @@ role: Senior Frontend Engineer
 client: Delosi
 start: 2025
 summary: E-commerce de 8 marcas sobre una misma base.
-stack: [Next.js, TypeScript, Zustand, TanStack Query, Strapi, IA aplicada al desarrollo]
+stack: [Next.js, TypeScript, Zustand, TanStack Query, Strapi]
 featured: true
 order: 1
 ---
 
 Pidelo es el e-commerce de las 8 marcas de Delosi en Perú: KFC, Starbucks, Burger King, Pizza Hut, Chili's, Madam Tusan, Pinkberry y Wanta. Todas venden online sobre una misma base.
 
-Hoy, liderando el equipo web de Chili's, Madam Tusan, Pinkberry y Wanta, y sumando iniciativas de Starbucks. Antes, paso por las demás marcas del grupo.
+Hoy, a cargo del equipo web de Chili's, Madam Tusan, Pinkberry y Wanta, además de iniciativas de Starbucks. Antes, en las demás marcas del grupo.
 
 ## La librería compartida
 
@@ -25,4 +25,4 @@ Refactor como parte del sprint, no como extra. Una base bien hecha hace que todo
 
 Filtros por campaña en la carta, recompra del último pedido y el ahorro con cupón visible en el checkout. También kioscos de autoservicio y el panel de promociones.
 
-Lo que viene: más ventas en los e-commerce, mejoras de accesibilidad y SEO, componentes modernizados e iniciativas centradas en la experiencia de quien hace el pedido.
+Lo que viene: mejoras de accesibilidad y SEO, componentes modernizados e iniciativas centradas en la experiencia de quien hace el pedido.

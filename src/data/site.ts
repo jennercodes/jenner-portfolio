@@ -11,6 +11,8 @@ export const site = {
   email: 'projects@jenner.codes',
   /** Usuario de WhatsApp (sin número público) */
   whatsapp: 'jenner.codes',
+  /** wa.me aún no abre chats por usuario: el número va solo en el enlace */
+  whatsappUrl: 'https://wa.me/51933809235',
   socials: [
     { label: 'GitHub', url: 'https://github.com/jennercodes' },
     { label: 'LinkedIn', url: 'https://www.linkedin.com/in/cjenneracostadiaz' },
@@ -68,17 +70,17 @@ export const talks: readonly Talk[] = [
 export const about = {
   paragraphs: [
     'Soy Jenner. Empecé enseñando tecnología en colegios de Ventanilla, después vinieron la comunicación audiovisual, el diseño, las primeras tiendas online y, poco a poco, el código. Hoy soy Senior Frontend Engineer en Delosi y sigo estudiando Ingeniería de Software.',
-    'Creo que la mejor forma de aprender es practicando, malogrando y aprendiendo de ello. Y siempre entender antes de hacer. Me tomó un buen tiempo entender cómo funcionaban las librerías de UI de Airbnb, pero no aprendí cómo funcionan: aprendí cómo debo pensar antes de hacer algo. Desde entonces, pasar de un framework a otro, o del frontend al backend, se me hace mucho más sencillo.',
-    'Los clientes tienen ideas grandes, y lo entiendo, pero al final siempre quieren soluciones simples y efectivas. Soy más feliz si pueden crecer con lo que construyo que enviándoles un presupuesto difícil de pagar por un software difícil de usar. Algunos crecieron tanto que se fueron con una agencia. Me dolió, pero hoy me alegra que lleguen a ese nivel.',
+    'Creo que la mejor forma de aprender es practicando, malogrando y aprendiendo de ello. Y siempre entender antes de hacer. Me tomó un buen tiempo entender las librerías de UI de Airbnb. Lo que me quedó no fue cómo funcionan, sino cómo pensar antes de hacer algo. Desde entonces, pasar de un framework a otro, o del frontend al backend, se me hace mucho más sencillo.',
+    'Los clientes tienen ideas grandes, y lo entiendo, pero al final siempre quieren soluciones simples y efectivas. Prefiero que crezcan con lo que construyo a enviarles un presupuesto difícil de pagar por un software difícil de usar. Algunos crecieron tanto que se fueron con una agencia. Me dolió, pero hoy me alegra que lleguen a ese nivel.',
     'La vida fue dura y aprender es duro, pero todo eso es para tener un futuro tranquilo. Amo a mi familia, y por ellos trabajo como trabajo.',
   ],
   /* Trayectoria: docs/identity/02-trayectoria.md (LinkedIn) */
   trayectoria: [
     { periodo: '2025 — hoy', rol: 'Senior Frontend Engineer', lugar: 'Delosi' },
-    { periodo: '2024 — 2025', rol: 'Frontend Engineer · Tech Lead', lugar: 'DB Target · Skolerom' },
+    { periodo: '2024 — 2025', rol: 'Tech Lead Frontend', lugar: 'DB Target · Skolerom' },
     { periodo: '2022 — 2024', rol: 'WordPress Developer', lugar: 'DB Target · Skolerom' },
-    { periodo: '2020 — hoy', rol: 'Hostbox Founder', lugar: 'Hostbox' },
-    { periodo: '2019 — 2022', rol: 'Frontend Developer', lugar: 'Makkre · Finitrip' },
+    { periodo: '2020 — hoy', rol: 'Founder', lugar: 'Hostbox' },
+    { periodo: '2019 — hoy', rol: 'Frontend Developer', lugar: 'Makkre · Finitrip' },
     { periodo: '2016 — 2020', rol: 'Diseño web y TIC', lugar: 'A&M Cars · RVG · Samishop' },
     { periodo: '2014 — 2015', rol: 'Docente de tecnología', lugar: 'Ventanilla, Callao' },
   ],

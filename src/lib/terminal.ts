@@ -12,6 +12,7 @@ interface TerminalData {
   location: string;
   email: string;
   whatsapp: string;
+  whatsappUrl: string;
   socials: readonly { label: string; url: string }[];
   principles: readonly string[];
   talks: readonly {
@@ -139,11 +140,11 @@ export function createTerminal(root: HTMLElement): void {
   const run: Record<string, (args: string[]) => void> = {
     help() {
       const rows: [string, string][] = [
-        ['whoami', 'quién soy'],
+        ['whoami', 'nombre y rol'],
         ['proyectos', 'lista de proyectos'],
         ['cat <proyecto>', 'resumen de un proyecto'],
         ['open <destino>', 'abre un proyecto, página o red'],
-        ['principios', 'cómo trabajo'],
+        ['principios', 'principios de trabajo'],
         ['charlas', 'charlas y conferencias'],
         ['contacto', 'cómo escribirme'],
         ['history', 'comandos usados'],
@@ -242,7 +243,7 @@ export function createTerminal(root: HTMLElement): void {
 
     contacto() {
       print(INDENT, 'email    ', { text: data.email, href: `mailto:${data.email}` });
-      print(INDENT, 'whatsapp ', data.whatsapp);
+      print(INDENT, 'whatsapp ', { text: data.whatsapp, href: data.whatsappUrl, external: true });
     },
 
     history() {

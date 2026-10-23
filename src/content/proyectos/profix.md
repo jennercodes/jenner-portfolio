@@ -2,13 +2,17 @@
 title: Profix
 role: Fullstack Developer
 start: 2023
-summary: Empezó como Phone Tool 360. Hoy es una plataforma que sigue creciendo.
-stack: [Laravel, Livewire, Alpine.js, MySQL]
+summary: Una base para crear herramientas y escuelas de distintos rubros.
+stack: [Laravel, Next.js, Livewire, Turborepo, MySQL]
 url: https://profix360.com
 featured: true
 order: 5
 ---
 
-Empezó como Phone Tool 360, un inventario de celulares para un negocio de reparación. Después sumó préstamos de equipos, una academia y más de 1 500 commits. Hoy es Profix, y sigue creciendo.
+Empezó con PhoneTool, una herramienta para la comunidad de reparación de celulares. Después vino una academia con cursos y diplomados. Hoy Profix es un sistema para crear herramientas y escuelas de distintos rubros, y siguen sumándose más.
+
+## Una base para todo
+
+Un solo login para todas las apps, un panel para gestionar escuelas, diplomados, cursos, herramientas y ventas, y una API que comparten. Cada herramienta nueva vive en su propio subdominio y se suma sin rehacer lo anterior.
 
 Un sistema que crece con el cliente, sin rehacerlo cada año.

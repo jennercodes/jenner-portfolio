@@ -138,11 +138,12 @@ const jsonLd = {
     <BottomNav />
     <div data-tui><p class="tui-loading">cargando ~/jenner.codes…</p></div>
     <script>
-      import { isTerminal } from '../lib/mode';
+      import { isTerminal, scrollToExitAnchor } from '../lib/mode';
 
       if (isTerminal()) {
         import('../lib/tui').then(({ mountTui }) => mountTui());
       } else {
+        scrollToExitAnchor();
         import('../lib/motion').then(({ initMotion }) => initMotion());
       }
     </script>
