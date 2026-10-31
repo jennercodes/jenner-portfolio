@@ -6,6 +6,7 @@ summary: Cinco marcas, una sola base.
 stack: [Next.js, Turborepo, Strapi, Zod, shadcn/ui]
 featured: true
 order: 3
+hidden: true
 ---
 
 Libre es un grupo inmobiliario con cinco marcas: corporativa, inmobiliaria, homes, coworking y locales comerciales. Lo fácil era hacer cinco webs; lo correcto era una base de la que salieran las cinco.

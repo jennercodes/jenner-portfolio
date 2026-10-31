@@ -124,6 +124,18 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
   });
   const doc = (path: string) => docs.get(path) ?? (docs.get(HOME) as Doc);
 
+  /** Por id o por título: "trazzo", "Trazzo Visual", "profix 360"… */
+  function openProject(arg: string): Reply {
+    const term = normalize(arg);
+    const p =
+      data.proyectos.find((x) => x.id === term) ??
+      data.proyectos.find((x) => normalize(x.title).includes(term) || x.id.includes(term));
+    const found = p && resolveDoc(docs, `proyectos/${p.id}`);
+    return found
+      ? read(found)
+      : error(`No existe el proyecto «${arg}».`, ...projectList(data.proyectos));
+  }
+
   function listProjects(list: Proyecto[], title: string): Reply {
     return text(
       'Buscando',
@@ -131,7 +143,11 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
       [],
       ...projectList(list),
       [],
-      [{ text: 'Clic en un proyecto para leerlo, o escribe @ y su nombre.', tone: 'dim' }],
+      [
+        { text: 'Clic en un proyecto para leerlo, o escribe ', tone: 'dim' },
+        { text: '/proyectos ', tone: 'code' },
+        { text: 'y elige uno de la lista.', tone: 'dim' },
+      ],
     );
   }
 
@@ -185,7 +201,7 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
           [
             { text: '@archivo', tone: 'code' },
             { text: '              abre un archivo: ', tone: 'dim' },
-            { text: '@proyectos/hostbox.md', href: 'cmd:@proyectos/hostbox.md' },
+            { text: '@proyectos/profix.md', href: 'cmd:@proyectos/profix.md' },
           ],
           [
             { text: 'texto libre', tone: 'code' },
@@ -203,20 +219,10 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
     },
     {
       name: 'proyectos',
-      desc: 'todos los proyectos',
-      run: () => listProjects(data.proyectos, `${data.proyectos.length} proyectos`),
-    },
-    {
-      name: 'proyecto',
-      args: '<nombre>',
-      desc: 'lee un caso de estudio',
-      run: (arg) => {
-        const found = arg && resolveDoc(docs, `proyectos/${normalize(arg)}`);
-        if (found) return read(found);
-        return arg
-          ? error(`No existe el proyecto «${arg}».`, ...projectList(data.proyectos))
-          : listProjects(data.proyectos, 'Elige un proyecto');
-      },
+      args: '[nombre]',
+      desc: 'los proyectos, o abre uno',
+      run: (arg) =>
+        arg ? openProject(arg) : listProjects(data.proyectos, `${data.proyectos.length} proyectos`),
     },
     { name: 'stack', args: '[tecnología]', desc: 'proyectos por tecnología', run: byStack },
     { name: 'sobre-mi', desc: 'historia y trayectoria', run: () => read(doc('sobre-mi.md')) },
@@ -241,6 +247,7 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
     ayuda: 'help',
     '?': 'help',
     projects: 'proyectos',
+    proyecto: 'proyectos',
     ls: 'proyectos',
     about: 'sobre-mi',
     whoami: 'sobre-mi',
@@ -349,9 +356,85 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
 
   // ── Render ──────────────────────────────────────────────
 
+  /** img:<archivo>#<índice> → la imagen y la lista del archivo (para el visor) */
+  function imageFor(href: string) {
+    const [path, i] = href.slice(4).split('#');
+    const images = docs.get(path)?.images ?? [];
+    const index = Number(i);
+    return images[index] ? { images, index, image: images[index] } : undefined;
+  }
+
+  /** PhotoSwipe, el mismo visor de la galería del modo normal */
+  async function openImage(href: string): Promise<void> {
+    const found = imageFor(href);
+    if (!found) return;
+    const [{ default: PhotoSwipe }] = await Promise.all([
+      import('photoswipe'),
+      import('photoswipe/style.css'),
+    ]);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const pswp = new PhotoSwipe({
+      dataSource: found.images.map((img) => ({ ...img })),
+      index: found.index,
+      showHideAnimationType: reduce ? 'none' : 'fade',
+      bgOpacity: 0.92,
+      closeTitle: 'Cerrar',
+      zoomTitle: 'Acercar',
+      arrowPrevTitle: 'Anterior',
+      arrowNextTitle: 'Siguiente',
+    });
+    pswp.on('destroy', () => input.focus({ preventScroll: true }));
+    pswp.init();
+  }
+
+  // Vista previa al pasar el mouse por un enlace de imagen (solo con puntero fino)
+  const preview = el('figure', 'tui-preview');
+  preview.setAttribute('aria-hidden', 'true');
+  const previewImg = el('img');
+  previewImg.alt = '';
+  previewImg.decoding = 'async';
+  preview.append(previewImg);
+  shell.root.append(preview);
+
+  function showPreview(link: HTMLElement): void {
+    const found = imageFor(link.dataset.href ?? '');
+    if (!found) return;
+    const width = Math.min(320, window.innerWidth - 32);
+    const height = Math.round((width * found.image.height) / found.image.width);
+    previewImg.src = found.image.thumb;
+    preview.style.width = `${width}px`;
+    previewImg.style.aspectRatio = `${found.image.width} / ${found.image.height}`;
+    // Arriba del enlace si cabe; si no, debajo. Siempre dentro de la ventana.
+    const r = link.getBoundingClientRect();
+    const gap = 10;
+    const top = r.top - height - gap - 10 > 8 ? r.top - height - gap - 10 : r.bottom + gap;
+    const left = Math.max(16, Math.min(r.left, window.innerWidth - width - 16));
+    preview.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+    preview.classList.add('is-visible');
+  }
+
+  function hidePreview(): void {
+    preview.classList.remove('is-visible');
+  }
+
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    log.addEventListener('pointerover', (event) => {
+      const link = (event.target as HTMLElement).closest<HTMLElement>(
+        'a.tui-link[data-href^="img:"]',
+      );
+      if (link) showPreview(link);
+    });
+    log.addEventListener('pointerout', (event) => {
+      const link = (event.target as HTMLElement).closest('a.tui-link[data-href^="img:"]');
+      if (link && !link.contains(event.relatedTarget as Node)) hidePreview();
+    });
+    log.addEventListener('scroll', hidePreview, { passive: true });
+  }
+
   const hrefFor: HrefFor = (href) => {
     if (href.startsWith('cmd:')) return '#';
     if (href.startsWith('page:')) return href.slice(5);
+    if (href.startsWith('img:')) return imageFor(href)?.image.src ?? '#';
     if (isExternal(href)) return href;
     return docs.get(href)?.url ?? '#';
   };
@@ -561,10 +644,16 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
 
     const name = value.slice(1, space).toLowerCase();
     const term = normalize(value.slice(space + 1));
-    if (name === 'proyecto') {
+    const projectCommand = ALIASES[name] ?? name;
+    if (projectCommand === 'proyectos') {
       return data.proyectos
         .filter((p) => p.id.includes(term) || normalize(p.title).includes(term))
-        .map((p) => ({ label: p.id, desc: p.summary, value: `/proyecto ${p.id}`, submit: true }));
+        .map((p) => ({
+          label: p.title,
+          desc: `${p.period} · ${p.summary}`,
+          value: `/${name} ${p.id}`,
+          submit: true,
+        }));
     }
     if (name === 'stack') {
       return stack
@@ -696,7 +785,10 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
       if (isExternal(href)) return;
       event.preventDefault();
       if (href.startsWith('cmd:')) void submit(href.slice(4));
-      else if (href.startsWith('page:')) onQuit(href.slice(5));
+      else if (href.startsWith('img:')) {
+        hidePreview();
+        void openImage(href);
+      } else if (href.startsWith('page:')) onQuit(href.slice(5));
       else void submit(`@${href}`);
       return;
     }

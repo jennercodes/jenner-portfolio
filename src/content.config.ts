@@ -22,6 +22,8 @@ const proyectos = defineCollection({
       /** Muestra la etiqueta "Proyecto personal" */
       personal: z.boolean().default(false),
       url: z.url().optional(),
+      /** Oculto: no se publica en ningún lado (páginas, listados, OG, sitemap ni modo terminal) */
+      hidden: z.boolean().default(false),
       /** Orden en los listados, de menor a mayor */
       order: z.number().int(),
       /** Captura para la imagen OG; sin ella se usa la primera de `gallery` */

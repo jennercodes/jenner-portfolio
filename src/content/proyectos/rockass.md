@@ -6,6 +6,7 @@ summary: La web de una agencia de booking de Nueva York y las de sus artistas.
 stack: [Next.js, Strapi, Astro, Tailwind CSS, PostgreSQL, Lighthouse CI]
 url: https://rockassonlinemusic.com/es
 order: 6
+hidden: true
 ---
 
 Rockass Online Music es un grupo de Nueva York con más de 18 años en booking, sello (ROM Label), prensa y eventos para artistas de habla hispana. Cliente desde 2020.

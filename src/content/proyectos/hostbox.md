@@ -8,6 +8,7 @@ featured: true
 personal: true
 url: https://hostbox.pe
 order: 4
+hidden: true
 ---
 
 Hosting y VPS Cloud para que un proyecto no se pierda después de entregarlo.

@@ -19,12 +19,27 @@ export interface TuiData {
     personal: boolean;
     url?: string;
     body: string;
+    /** Imágenes del texto y de la galería; el markdown las cita como #img-<índice> */
+    images: TuiImage[];
+    /** Índices de `images` que forman la galería */
+    gallery: number[];
   }[];
   /** Markdown de /privacidad (src/data/privacidad.md) */
   privacidad: string;
 }
 
-export type Tone = 'fg' | 'muted' | 'dim' | 'accent' | 'strong' | 'code' | 'prop';
+/** Imagen ya optimizada en el build, lista para PhotoSwipe */
+export interface TuiImage {
+  src: string;
+  /** Miniatura de 480 px para la vista previa al pasar el mouse */
+  thumb: string;
+  width: number;
+  height: number;
+  alt: string;
+}
+
+/** `pre`: texto que no se parte (diagramas en texto) */
+export type Tone = 'fg' | 'muted' | 'dim' | 'accent' | 'strong' | 'code' | 'prop' | 'pre';
 
 export interface Token {
   text: string;
@@ -43,4 +58,6 @@ export interface Doc {
   /** Página real equivalente, a donde lleva /exit */
   url: string;
   lines: Line[];
+  /** Imágenes que citan sus enlaces img:<ruta>#<índice> */
+  images?: TuiImage[];
 }

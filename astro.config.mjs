@@ -36,5 +36,8 @@ export default defineConfig({
   integrations: [sitemap({ filter: (page) => !page.includes('/404') })],
   vite: {
     plugins: [tailwindcss()],
+    // PhotoSwipe se importa bajo demanda (galería y modo terminal): sin esto, Vite lo
+    // descubre a mitad de sesión en dev, reoptimiza y responde 504 "Outdated Optimize Dep"
+    optimizeDeps: { include: ['photoswipe', 'photoswipe/lightbox', 'gsap'] },
   },
 });

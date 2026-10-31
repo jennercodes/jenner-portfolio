@@ -88,6 +88,22 @@ Escribir lo nuevo era la parte fácil. Lo difícil era no romper lo que ya estab
 <text x="86" y="466" class="dg-meta">revalida la caché de Academy por webhook firmado</text>
 </svg>
 <figcaption>Cinco apps, una sesión y una sola API.</figcaption>
+<!--tui
+navegador · cookie en .profix360.com
+├─ Academy      profix360.com
+├─ Login        auth.
+├─ Dashboard    dashboard.
+└─ PhoneTool    phonetool.
+   │
+   ▼
+API · Laravel   api.profix360.com
+│  academy · billing · user · mcp · cola
+├─ MySQL
+└─ Cloudflare R2
+·
+cola ┄┄▶ academy: revalida la caché
+         por webhook firmado
+-->
 </figure>
 
 Lo obvio era montar OAuth entre las apps. No hacía falta: todas viven bajo el mismo dominio y comparten la misma base de usuarios. Laravel Fortify inicia la sesión y deja la cookie en el dominio principal, así que cualquier app que la recibe ya sabe quién es. Si falta, la app manda a `/api/authorize`, que pasa por el login y vuelve, pero solo a un destino que sea una de las apps propias.

@@ -37,7 +37,7 @@ Astro 7 (estático, `build.format: 'file'`, `trailingSlash: 'never'`) · Tailwin
 | Página de privacidad (web y modo terminal) | `src/data/privacidad.md` → `/privacidad`. Actualizarla si el sitio suma un servicio externo, cookies o datos |
 | Despliegue (Coolify, build pack Dockerfile, puerto 80) | `Dockerfile` + `docker/nginx.conf` |
 
-`featured: true` → aparece en "Trabajo seleccionado" de la portada. `personal: true` → etiqueta "Proyecto personal". Sin `end` → "— hoy".
+`featured: true` → aparece en "Trabajo seleccionado" de la portada. `personal: true` → etiqueta "Proyecto personal". Sin `end` → "— hoy". `hidden: true` → no se publica en ningún lado (página, listados, OG, sitemap ni modo terminal; el filtro está en `getProyectos()`): para casos cuyo contenido todavía no está revisado. Tras cambiar `content.config.ts`, el dev server puede necesitar `rm -rf node_modules/.astro/data-store.json .astro/data-store.json` y reiniciar.
 
 ## Identidad (no romper)
 

@@ -7,6 +7,7 @@ summary: Más de 300 fincas en Mallorca, siete años después.
 stack: [WordPress, PHP, JavaScript, Google Maps API]
 url: https://finitrip.de
 order: 8
+hidden: true
 ---
 
 Portal alemán para alquilar más de 300 fincas en Mallorca. Buscador por fechas exactas, flexibles o por nombre de finca, filtros por personas, piscina o vista al mar, y diseño de las herramientas internas.

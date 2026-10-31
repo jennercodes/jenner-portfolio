@@ -63,12 +63,15 @@ export async function mountTui(): Promise<void> {
   });
 
   if (!reduced) {
+    // opacity, no autoAlpha: con visibility hidden el input no puede recibir el foco
     gsap.from(shell.root.querySelector('.tui-dock'), {
       y: 24,
-      autoAlpha: 0,
+      opacity: 0,
       duration: 0.5,
       ease: 'power3.out',
     });
   }
   chat.start();
+  // Al entrar desde el botón, el foco puede quedarse en él: se fuerza en el siguiente frame
+  requestAnimationFrame(() => shell.input.focus({ preventScroll: true }));
 }

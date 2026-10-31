@@ -24,12 +24,14 @@ function inline(text: string, base: Omit<Token, 'text'> = {}): Token[] {
   return tokens;
 }
 
-export function parseMarkdown(source: string): Line[] {
+/** `path`: el archivo, para que las imágenes (#img-N) enlacen a img:<path>#N */
+export function parseMarkdown(source: string, path = ''): Line[] {
   const lines: Line[] = [];
   const raw = source.replace(/\r\n/g, '\n').replace(/\n+$/, '').split('\n');
   let inFrontmatter = raw[0] === '---';
   let inFence = false;
   let inFigure = false;
+  let inAscii = false;
 
   raw.forEach((text, i) => {
     if (inFrontmatter) {
@@ -51,11 +53,21 @@ export function parseMarkdown(source: string): Line[] {
       return;
     }
 
-    // Figura en HTML (diagramas): la terminal solo muestra su pie
+    // Figura en HTML (diagramas): la terminal muestra su pie y la versión en texto
+    // que viene dentro de un comentario <!--tui … --> (invisible en la web)
     if (text.startsWith('<figure')) inFigure = true;
     if (inFigure) {
+      if (inAscii) {
+        if (text.startsWith('-->')) inAscii = false;
+        else lines.push([{ text, tone: 'pre' }]);
+        return;
+      }
+      if (text.startsWith('<!--tui')) {
+        inAscii = true;
+        return;
+      }
       const caption = text.match(/<figcaption>(.*)<\/figcaption>/);
-      if (caption) lines.push([{ text: `[diagrama] ${caption[1]}`, tone: 'dim' }]);
+      if (caption) lines.push([{ text: `◇ ${caption[1]}`, tone: 'fg', bold: true }], []);
       if (text.startsWith('</figure>')) inFigure = false;
       return;
     }
@@ -69,10 +81,18 @@ export function parseMarkdown(source: string): Line[] {
       return;
     }
 
-    // Una imagen sola en su línea: la terminal solo muestra su descripción
-    const image = text.match(/^!\[([^\]]*)\]\([^)]*\)$/);
+    // Una imagen sola en su línea: enlace que la abre en el visor (img:<archivo>#<índice>)
+    const image = text.match(/^!\[([^\]]*)\]\(([^)]*)\)$/);
     if (image) {
-      lines.push([{ text: `[imagen] ${image[1]}`, tone: 'dim' }]);
+      const index = image[2].match(/^#img-(\d+)$/)?.[1];
+      lines.push(
+        index !== undefined && path
+          ? [
+              { text: '▣ ', tone: 'accent' },
+              { text: image[1], href: `img:${path}#${index}` },
+            ]
+          : [{ text: `▣ ${image[1]}`, tone: 'dim' }],
+      );
       return;
     }
 

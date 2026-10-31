@@ -47,7 +47,13 @@ function proyecto(p: Proyecto): string {
     p.personal && 'personal: true',
     '---',
   ].filter(Boolean);
-  return [...meta, '', `# ${p.title}`, '', `> ${p.summary}`, '', p.body.trim()].join('\n');
+  // La galería del sidebar, como en la web: cada captura abre el visor
+  const gallery = p.gallery.length
+    ? ['', '## Capturas', '', ...p.gallery.map((i) => `![${p.images[i].alt}](#img-${i})`)]
+    : [];
+  return [...meta, '', `# ${p.title}`, '', `> ${p.summary}`, '', p.body.trim(), ...gallery].join(
+    '\n',
+  );
 }
 
 function sobreMi(data: TuiData): string {
@@ -100,11 +106,12 @@ function contacto(data: TuiData): string {
 
 export function createDocs(data: TuiData): Map<string, Doc> {
   const docs = new Map<string, Doc>();
-  const add = (path: string, url: string, markdown: string) =>
-    docs.set(path, { path, url, lines: parseMarkdown(markdown) });
+  const add = (path: string, url: string, markdown: string, images?: Doc['images']) =>
+    docs.set(path, { path, url, lines: parseMarkdown(markdown, path), images });
 
   add(HOME, '/', readme(data));
-  for (const p of data.proyectos) add(`proyectos/${p.id}.md`, `/proyectos/${p.id}`, proyecto(p));
+  for (const p of data.proyectos)
+    add(`proyectos/${p.id}.md`, `/proyectos/${p.id}`, proyecto(p), p.images);
   add('sobre-mi.md', '/sobre-mi', sobreMi(data));
   add('charlas.md', '/#charlas', charlas(data));
   add('contacto.md', '/#contacto', contacto(data));

@@ -7,6 +7,7 @@ summary: E-commerce de 8 marcas sobre una misma base.
 stack: [Next.js, TypeScript, Zustand, TanStack Query, Strapi]
 featured: true
 order: 1
+hidden: true
 ---
 
 Pidelo es el e-commerce de las 8 marcas de Delosi en Perú: KFC, Starbucks, Burger King, Pizza Hut, Chili's, Madam Tusan, Pinkberry y Wanta. Todas venden online sobre una misma base.

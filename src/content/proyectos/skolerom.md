@@ -9,6 +9,7 @@ stack: [Next.js, TanStack Query, Zustand, Arktype, Playwright, GitHub Actions]
 featured: true
 url: https://skolerom.no
 order: 2
+hidden: true
 ---
 
 Plataforma educativa para colegios de toda Noruega: más de 500 artículos, 300 rutas de aprendizaje y 1 000 ejercicios, en cinco idiomas. De mantener el WordPress a liderar el frontend.
