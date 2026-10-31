@@ -1,7 +1,7 @@
 /*
  * Tokenizador mínimo de markdown para la TUI: lo justo para los casos y los buffers.
- * Encabezados, listas, citas, frontmatter, **negrita**, `código` y [enlaces](url).
- * Los marcadores (**, `, []()) no se muestran.
+ * Encabezados, listas, citas, frontmatter, bloques de código, imágenes, figuras, **negrita**,
+ * `código` y [enlaces](url). Los marcadores (**, `, ```, []()) no se muestran.
  */
 
 import type { Line, Token } from './types';
@@ -28,6 +28,8 @@ export function parseMarkdown(source: string): Line[] {
   const lines: Line[] = [];
   const raw = source.replace(/\r\n/g, '\n').replace(/\n+$/, '').split('\n');
   let inFrontmatter = raw[0] === '---';
+  let inFence = false;
+  let inFigure = false;
 
   raw.forEach((text, i) => {
     if (inFrontmatter) {
@@ -46,6 +48,31 @@ export function parseMarkdown(source: string): Line[] {
             ]
           : [{ text, tone: 'muted' }],
       );
+      return;
+    }
+
+    // Figura en HTML (diagramas): la terminal solo muestra su pie
+    if (text.startsWith('<figure')) inFigure = true;
+    if (inFigure) {
+      const caption = text.match(/<figcaption>(.*)<\/figcaption>/);
+      if (caption) lines.push([{ text: `[diagrama] ${caption[1]}`, tone: 'dim' }]);
+      if (text.startsWith('</figure>')) inFigure = false;
+      return;
+    }
+
+    if (text.startsWith('```')) {
+      inFence = !inFence;
+      return;
+    }
+    if (inFence) {
+      lines.push([{ text: `  ${text}`, tone: 'code' }]);
+      return;
+    }
+
+    // Una imagen sola en su línea: la terminal solo muestra su descripción
+    const image = text.match(/^!\[([^\]]*)\]\([^)]*\)$/);
+    if (image) {
+      lines.push([{ text: `[imagen] ${image[1]}`, tone: 'dim' }]);
       return;
     }
 

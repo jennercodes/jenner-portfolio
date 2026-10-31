@@ -82,7 +82,7 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
   /** Nombres que no están en el título del proyecto */
   const PROJECT_ALIASES: Record<string, string[]> = {
     rockass: ['rabanes', 'mirlos', 'chicas dulces', 'rom label'],
-    profix: ['phonetool', 'phone tool'],
+    profix: ['phonetool', 'phone tool', 'profix360'],
   };
   const projectKeys = data.proyectos.map((p) => ({
     p,

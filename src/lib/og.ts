@@ -1,6 +1,8 @@
 /*
  * Imágenes para compartir (og:image) en build: satori dibuja el SVG, sharp lo pasa a PNG.
  * Estilo Blueprint: fondo casi negro, retícula de 32 px y brillo azul arriba.
+ * Con `image`, el texto ocupa la columna izquierda y la captura va a la derecha
+ * en una ventana de navegador que sale por el borde.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -41,16 +43,88 @@ export type OgContent = {
   eyebrow: string;
   title: string;
   subtitle?: string;
+  /** Ruta de una captura del proyecto (PNG/JPG/WebP) */
+  image?: string;
 };
 
-export async function renderOg({ eyebrow, title, subtitle }: OgContent): Promise<Buffer> {
-  const titleSize = title.length > 34 ? 64 : title.length > 22 ? 80 : 96;
+const SHOT = { left: 640, top: 112, width: 640, height: 420, bar: 36 };
+
+/** La captura recortada desde arriba, como data URI para satori */
+async function shot(path: string): Promise<string> {
+  const height = SHOT.height - SHOT.bar;
+  const jpg = await sharp(path)
+    .resize({ width: SHOT.width * 2, height: height * 2, fit: 'cover', position: 'top' })
+    .jpeg({ quality: 82 })
+    .toBuffer();
+  return `data:image/jpeg;base64,${jpg.toString('base64')}`;
+}
+
+function browser(src: string): Node {
+  const dot = (color: string) =>
+    h('div', { width: 12, height: 12, borderRadius: 6, backgroundColor: color });
+  return h(
+    'div',
+    {
+      position: 'absolute',
+      left: SHOT.left,
+      top: SHOT.top,
+      width: SHOT.width,
+      height: SHOT.height,
+      display: 'flex',
+      flexDirection: 'column',
+      borderRadius: 16,
+      overflow: 'hidden',
+      border: '1px solid rgba(255,255,255,0.14)',
+      backgroundColor: '#18181b',
+      boxShadow: '0 0 80px rgba(61,123,240,0.35)',
+    },
+    h(
+      'div',
+      {
+        height: SHOT.bar,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        paddingLeft: 16,
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+      },
+      dot('#3f3f46'),
+      dot('#3f3f46'),
+      dot('#3f3f46'),
+    ),
+    {
+      type: 'img',
+      props: {
+        src,
+        width: SHOT.width,
+        height: SHOT.height - SHOT.bar,
+        style: { objectFit: 'cover' },
+      },
+    },
+  );
+}
+
+export async function renderOg({ eyebrow, title, subtitle, image }: OgContent): Promise<Buffer> {
+  const narrow = Boolean(image);
+  const titleSize = narrow
+    ? title.length > 14
+      ? 60
+      : 76
+    : title.length > 34
+      ? 64
+      : title.length > 22
+        ? 80
+        : 96;
+  const textWidth = narrow ? 520 : 1000;
 
   const tree = h(
     'div',
     {
       width: '100%',
       height: '100%',
+      position: 'relative',
+      // Sin esto el padding se suma al alto y el pie queda fuera de los 630 px
+      boxSizing: 'border-box',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
@@ -76,7 +150,7 @@ export async function renderOg({ eyebrow, title, subtitle }: OgContent): Promise
     ),
     h(
       'div',
-      { display: 'flex', flexDirection: 'column', gap: 24 },
+      { display: 'flex', flexDirection: 'column', gap: narrow ? 20 : 24, maxWidth: textWidth },
       h(
         'div',
         {
@@ -95,12 +169,23 @@ export async function renderOg({ eyebrow, title, subtitle }: OgContent): Promise
           fontWeight: 600,
           letterSpacing: '-0.04em',
           lineHeight: 1,
-          maxWidth: 1000,
+          maxWidth: textWidth,
         },
         title,
       ),
       ...(subtitle
-        ? [h('div', { fontSize: 32, color: '#a1a1aa', lineHeight: 1.35, maxWidth: 940 }, subtitle)]
+        ? [
+            h(
+              'div',
+              {
+                fontSize: narrow ? 26 : 32,
+                color: '#a1a1aa',
+                lineHeight: 1.35,
+                maxWidth: narrow ? textWidth : 940,
+              },
+              subtitle,
+            ),
+          ]
         : []),
     ),
     h(
@@ -112,9 +197,11 @@ export async function renderOg({ eyebrow, title, subtitle }: OgContent): Promise
         fontSize: 22,
         color: '#71717a',
       },
-      'Jenner Acosta · Senior Frontend Engineer',
-      'Lima, Perú',
+      // satori no dibuja dos textos sueltos en un contenedor flex: cada uno en su div
+      h('div', {}, 'Jenner Acosta · Senior Frontend Engineer'),
+      ...(narrow ? [] : [h('div', {}, 'Lima, Perú')]),
     ),
+    ...(image ? [browser(await shot(image))] : []),
   );
 
   const svg = await satori(tree as Parameters<typeof satori>[0], {

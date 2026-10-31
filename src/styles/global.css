@@ -184,6 +184,94 @@
   & li::marker {
     color: var(--accent);
   }
+  & img {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+  }
+  & p:has(> img) {
+    margin-top: 2.5em;
+    margin-bottom: 2.5em;
+  }
+  & pre {
+    overflow-x: auto;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  & figure.diagram {
+    margin-block: 2.5em;
+  }
+  & .diagram svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  & .diagram figcaption {
+    margin-top: 0.75rem;
+    font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+  & .dg-box {
+    fill: var(--surface);
+    stroke: var(--line);
+  }
+  & .dg-name {
+    fill: var(--fg);
+    font-family: var(--font-space-grotesk), system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  & .dg-meta,
+  & .dg-chip {
+    fill: var(--muted);
+    font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+    font-size: 12px;
+  }
+  & .dg-chip {
+    font-size: 11px;
+    text-anchor: middle;
+  }
+  & .dg-center {
+    text-anchor: middle;
+  }
+  & .dg-chip-box {
+    fill: var(--bg);
+    stroke: var(--line);
+  }
+  & .dg-chip-accent {
+    fill: var(--tag-bg);
+    stroke: var(--tag-line);
+  }
+  & .dg-chip-accent-text {
+    fill: var(--tag-fg);
+  }
+  & .dg-line {
+    stroke: var(--subtle);
+    stroke-width: 1.5;
+  }
+  & .dg-head {
+    fill: var(--subtle);
+  }
+  & .dg-loop {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+  }
+  & .dg-head-accent {
+    fill: var(--accent);
+  }
+  & :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--fg);
+  }
   & li strong {
     color: var(--fg);
     font-weight: 600;

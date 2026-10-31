@@ -1,6 +1,8 @@
 ---
+import { getImage } from 'astro:assets';
 import { render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
+import Gallery from '../../components/Gallery.astro';
 import Tag from '../../components/Tag.astro';
 import { site } from '../../data/site';
 import Base from '../../layouts/Base.astro';
@@ -20,19 +22,33 @@ interface Props {
 }
 
 const { proyecto, next } = Astro.props;
-const { title, role, client, summary, stack, personal, url } = proyecto.data;
+const { title, role, client, summary, stack, personal, url, gallery } = proyecto.data;
 const { Content } = await render(proyecto);
 
 const period = formatPeriod(proyecto.data);
-const description = `${summary} Caso de estudio: ${role}, ${period}. ${stack.slice(0, 3).join(', ')}.`;
+// La descripción más completa que quepa en ~160 caracteres (lo que muestra Google)
+const description =
+  [
+    `${summary} Caso de estudio: ${role}, ${period}. ${stack.slice(0, 3).join(', ')}.`,
+    `${summary} Caso de estudio: ${role}, ${period}.`,
+    `${summary} ${role}, ${period}.`,
+  ].find((d) => d.length <= 160) ?? summary;
 const pageUrl = new URL(`/proyectos/${proyecto.id}`, site.url).href;
+// Las capturas también van al JSON-LD, para que Google las asocie al caso
+const screenshots = await Promise.all(
+  gallery.map(async ({ src }) => {
+    const img = await getImage({ src, format: 'webp', width: Math.min(src.width, 2400) });
+    return new URL(img.src, site.url).href;
+  }),
+);
 const schema = [
   {
     '@type': 'CreativeWork',
     name: title,
     description: summary,
     url: pageUrl,
-    image: new URL(`/og/proyectos/${proyecto.id}.png`, site.url).href,
+    image: [new URL(`/og/proyectos/${proyecto.id}.png`, site.url).href, ...screenshots],
+    dateCreated: String(proyecto.data.start),
     author: { '@id': `${site.url}/#person` },
     keywords: stack.join(', '),
     inLanguage: 'es',
@@ -49,7 +65,7 @@ const schema = [
 ];
 ---
 
-<Base title={title} description={description} og={`proyectos/${proyecto.id}`} ogAlt={`${title}: ${summary}`} schema={schema}>
+<Base title={`${title} · Caso de estudio`} ogType="article" description={description} og={`proyectos/${proyecto.id}`} ogAlt={`${title}: ${summary}`} schema={schema}>
   <article class="mx-auto max-w-6xl px-4 pt-12 pb-24 sm:px-8 sm:pt-20">
     <a href="/proyectos" data-hero-item class="font-mono text-[13px] text-muted transition-colors hover:text-fg">← Proyectos</a>
 
@@ -59,7 +75,7 @@ const schema = [
         {personal && <Tag>Proyecto personal</Tag>}
       </div>
       <p data-hero-item class="max-w-2xl text-xl leading-relaxed text-muted">{summary}</p>
-      <dl data-hero-item class="grid gap-x-10 gap-y-4 font-mono text-[13px] sm:grid-cols-[repeat(3,auto)] sm:justify-start">
+      <dl data-hero-item class="grid grid-cols-2 gap-x-6 gap-y-4 font-mono text-[13px] sm:flex sm:flex-wrap sm:gap-x-10">
         <div class="flex flex-col gap-1">
           <dt class="tracking-[0.12em] text-muted uppercase">Rol</dt>
           <dd class="m-0 text-fg">{role}</dd>
@@ -76,10 +92,22 @@ const schema = [
             </div>
           )
         }
+        {
+          url && (
+            <div class="flex flex-col gap-1">
+              <dt class="tracking-[0.12em] text-muted uppercase">Sitio</dt>
+              <dd class="m-0">
+                <a href={url} target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-strong">
+                  {new URL(url).hostname.replace(/^www\./, '')} ↗
+                </a>
+              </dd>
+            </div>
+          )
+        }
       </dl>
     </header>
 
-    <div class="mt-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_280px]">
+    <div class="mt-12 grid grid-cols-[minmax(0,1fr)] gap-12 lg:grid-cols-[minmax(0,1fr)_280px]">
       <div data-reveal class="prose-case max-w-2xl">
         <Content />
       </div>
@@ -94,13 +122,7 @@ const schema = [
             }
           </ul>
         </div>
-        {
-          url && (
-            <a href={url} target="_blank" rel="noopener noreferrer" class="font-mono text-sm text-accent hover:text-accent-strong">
-              {new URL(url).hostname.replace(/^www\./, '')} ↗
-            </a>
-          )
-        }
+        {gallery.length > 0 && <Gallery items={gallery} />}
       </aside>
     </div>
 

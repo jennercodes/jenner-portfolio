@@ -18,6 +18,8 @@ interface Props {
   ogAlt?: string;
   /** JSON-LD adicional de la página (se suma al de Person) */
   schema?: Record<string, unknown>[];
+  /** og:type: "article" en los casos, "website" en el resto */
+  ogType?: 'website' | 'article';
 }
 
 const {
@@ -27,6 +29,7 @@ const {
   og = 'index',
   ogAlt = `${site.author}, ${site.role}`,
   schema = [],
+  ogType = 'website',
 } = Astro.props;
 
 const fullTitle = title
@@ -102,7 +105,7 @@ const jsonLd = {
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:locale" content="es_PE" />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={fullTitle} />

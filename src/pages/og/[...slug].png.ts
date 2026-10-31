@@ -1,7 +1,13 @@
-import type { APIRoute, GetStaticPaths } from 'astro';
+import type { APIRoute, GetStaticPaths, ImageMetadata } from 'astro';
 import { site } from '../../data/site';
 import { type OgContent, renderOg } from '../../lib/og';
 import { formatPeriod, getProyectos } from '../../lib/proyectos';
+
+/** Ruta en disco de una imagen del contenido (Astro la expone como `fsPath`, no enumerable) */
+function fsPath(img: ImageMetadata | undefined): string | undefined {
+  const path = (img as (ImageMetadata & { fsPath?: string }) | undefined)?.fsPath;
+  return typeof path === 'string' ? path : undefined;
+}
 
 /** Una imagen por página: /og/index.png, /og/proyectos.png, /og/proyectos/<id>.png… (Base.astro) */
 export const getStaticPaths = (async () => {
@@ -38,6 +44,7 @@ export const getStaticPaths = (async () => {
         eyebrow: `Caso de estudio · ${formatPeriod(p.data)}`,
         title: p.data.title,
         subtitle: p.data.summary,
+        image: fsPath(p.data.cover ?? p.data.gallery[0]?.src),
       },
     })),
   ];
