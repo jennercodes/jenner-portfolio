@@ -7,6 +7,7 @@ import ConsentBanner from '../components/ConsentBanner.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { site } from '../data/site';
+import { ogVersion } from '../lib/og-pages';
 
 interface Props {
   /** Título de la página; se completa con " · jenner.codes". */
@@ -38,7 +39,11 @@ const fullTitle = title
   : `${site.author} · Senior Frontend Engineer · ${site.name}`;
 const canonical = new URL(Astro.url.pathname.replace(/\.html$/, ''), site.url).href;
 
-const ogImage = new URL(`/og/${og}.png`, site.url).href;
+const ogUrl = new URL(`/og/${og}.png`, site.url);
+// Versión de la imagen: si cambia, cambia la URL y ninguna caché sirve la anterior
+const ogV = await ogVersion(og);
+if (ogV) ogUrl.searchParams.set('v', ogV);
+const ogImage = ogUrl.href;
 const photo = await getImage({ src: portrait, width: 800, format: 'jpg' });
 
 const person = {

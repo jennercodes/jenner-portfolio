@@ -32,7 +32,8 @@ Astro 7 (estático, `build.format: 'file'`, `trailingSlash: 'never'`) · Tailwin
 | Casos de estudio | `src/content/proyectos/*.md` (schema en `src/content.config.ts`) |
 | Tokens de color, degradados, `prose-case` | `src/styles/global.css` |
 | Layout + SEO + JSON-LD (Person; cada página suma el suyo con `schema`) | `src/layouts/Base.astro` |
-| Imágenes para compartir (og:image), generadas en build | `src/lib/og.ts` + `src/pages/og/[...slug].png.ts` (página nueva → agregarla ahí y pasar `og` a `Base`) |
+| Imágenes para compartir (og:image), generadas en build | `src/lib/og.ts` (dibujo) + `src/lib/og-pages.ts` (qué imagen tiene cada página; página nueva → agregarla ahí y pasar `og` a `Base`). La URL lleva `?v=<hash>` del PNG: no hace falta purgar Cloudflare |
+| Flujo para enriquecer y publicar un caso de estudio | Skill `caso-de-estudio` (`.claude/skills/caso-de-estudio/`): investigación, entrevista, capturas saneadas, diagrama, terminal, verificación y publicación |
 | Analítica (GA4 solo con consentimiento, Consent Mode v2 básico) | `src/lib/analytics.ts` + `src/components/ConsentBanner.astro` · ID en `site.gaId` |
 | Página de privacidad (web y modo terminal) | `src/data/privacidad.md` → `/privacidad`. Actualizarla si el sitio suma un servicio externo, cookies o datos |
 | Despliegue (Coolify, build pack Dockerfile, puerto 80) | `Dockerfile` + `docker/nginx.conf` |
