@@ -37,7 +37,9 @@ await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
 
 // Banner de cookies del sitio, si lo hay
 const cookies = p
-  .getByRole('button', { name: /rechazar|solo necesarias|aceptar|entendido/i })
+  .getByRole('button', {
+    name: /rechazar|solo necesarias|aceptar|entendido|reject|decline|avvis|avvisa|ablehnen/i,
+  })
   .first();
 if (await cookies.count()) await cookies.click().catch(() => {});
 
