@@ -281,8 +281,13 @@
 /*
  * Movimiento (src/lib/motion.ts). html.motion lo pone el script del head solo si
  * no hay prefers-reduced-motion; así lo animado no parpadea antes de que cargue GSAP.
+ * El contenido solo se vuelve transparente (no visibility): sigue accesible mientras espera.
  */
-.motion :is([data-split], [data-hero-item], [data-reveal], [data-stagger] > *, [data-cross]) {
+.motion :is([data-split], [data-hero-item], [data-reveal], [data-stagger] > *) {
+  opacity: 0;
+}
+
+.motion [data-cross] {
   visibility: hidden;
 }
 

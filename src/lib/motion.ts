@@ -10,6 +10,9 @@
  *   data-magnetic    se acerca al puntero
  *   .bg-glow         el brillo de la tarjeta sigue al puntero
  * Sin prefers-reduced-motion: no-preference no se anima nada.
+ *
+ * El contenido se oculta solo con opacity (no autoAlpha/visibility): así sigue en el árbol
+ * de accesibilidad mientras espera su animación y los lectores de pantalla lo encuentran.
  */
 
 import { gsap } from 'gsap';
@@ -49,11 +52,11 @@ function intro(): void {
 
   for (const el of all('[data-split]')) {
     const split = SplitText.create(el, { type: 'words,chars', mask: 'words' });
-    gsap.set(el, { autoAlpha: 1 });
+    gsap.set(el, { opacity: 1 });
     tl.from(split.chars, { yPercent: 110, duration: 1, stagger: 0.03 }, 0);
   }
 
-  tl.from(all('[data-hero-item]'), { autoAlpha: 0, y: 18, duration: 0.8, stagger: 0.09 }, 0.25);
+  tl.from(all('[data-hero-item]'), { opacity: 0, y: 18, duration: 0.8, stagger: 0.09 }, 0.25);
 
   for (const el of all('[data-scramble]')) {
     tl.to(
@@ -124,7 +127,7 @@ function hero(cleanups: Cleanup[], fine: boolean): void {
 function reveals(): void {
   for (const el of all('[data-reveal]')) {
     gsap.from(el, {
-      autoAlpha: 0,
+      opacity: 0,
       y: 36,
       duration: 1,
       ease: 'power3.out',
@@ -134,13 +137,13 @@ function reveals(): void {
 
   for (const list of all('[data-stagger]')) {
     const items = [...list.children] as HTMLElement[];
-    gsap.set(items, { autoAlpha: 0, y: 22 });
+    gsap.set(items, { opacity: 0, y: 22 });
     ScrollTrigger.batch(items, {
       start: 'top 94%',
       once: true,
       onEnter: (batch) =>
         gsap.to(batch, {
-          autoAlpha: 1,
+          opacity: 1,
           y: 0,
           duration: 0.7,
           stagger: 0.07,
@@ -218,6 +221,9 @@ export function initMotion(): void {
     (context) => {
       const { motion, fine } = context.conditions as { motion: boolean; fine: boolean };
       if (!motion) return;
+      // Antes de crear las animaciones: gsap.from() toma el valor final del estilo actual,
+      // y con el CSS antiparpadeo puesto ese valor sería opacity 0. Es síncrono: no parpadea.
+      document.documentElement.classList.remove('motion');
       const cleanups: Cleanup[] = [];
       intro();
       hero(cleanups, fine);
