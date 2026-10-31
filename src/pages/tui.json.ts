@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { rawContent } from '../data/privacidad.md';
 import { about, nav, principles, site, talks } from '../data/site';
 import { formatPeriod, getProyectos } from '../lib/proyectos';
 import type { TuiData } from '../lib/tui/types';
@@ -19,5 +20,13 @@ export const GET: APIRoute = async () => {
     body: p.body ?? '',
   }));
 
-  return Response.json({ site, nav, principles, talks, about, proyectos } satisfies TuiData);
+  return Response.json({
+    site,
+    nav,
+    principles,
+    talks,
+    about,
+    proyectos,
+    privacidad: rawContent(),
+  } satisfies TuiData);
 };

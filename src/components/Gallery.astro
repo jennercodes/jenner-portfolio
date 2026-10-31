@@ -12,6 +12,8 @@ interface Props {
 }
 
 const { items } = Astro.props;
+/** Las dos primeras filas: en escritorio están a la vista al cargar y pesan pocos KB */
+const EAGER = 4;
 const images = await Promise.all(
   items.map(async (item) => ({
     ...item,
@@ -24,7 +26,7 @@ const images = await Promise.all(
   <h2 class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Capturas</h2>
   <ul data-gallery class="grid grid-cols-2 gap-2">
     {
-      images.map(({ src, alt, full }) => (
+      images.map(({ src, alt, full }, i) => (
         <li>
           <a
             href={full.src}
@@ -36,6 +38,8 @@ const images = await Promise.all(
               src={src}
               alt={alt}
               widths={[160, 320]}
+              loading={i < EAGER ? 'eager' : 'lazy'}
+              decoding="async"
               sizes="(min-width: 1024px) 136px, 45vw"
               class="h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none"
             />

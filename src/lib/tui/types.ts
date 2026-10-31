@@ -20,6 +20,8 @@ export interface TuiData {
     url?: string;
     body: string;
   }[];
+  /** Markdown de /privacidad (src/data/privacidad.md) */
+  privacidad: string;
 }
 
 export type Tone = 'fg' | 'muted' | 'dim' | 'accent' | 'strong' | 'code' | 'prop';

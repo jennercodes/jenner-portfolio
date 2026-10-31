@@ -13,6 +13,8 @@ export const site = {
   whatsapp: 'jenner.codes',
   /** wa.me aún no abre chats por usuario: el número va solo en el enlace */
   whatsappUrl: 'https://wa.me/51933809235',
+  /** GA4 (propiedad "jenner.codes"). Solo carga en producción y si el visitante acepta (ConsentBanner) */
+  gaId: 'G-M5SRGN97Z2',
   socials: [
     { label: 'GitHub', url: 'https://github.com/jennercodes' },
     { label: 'LinkedIn', url: 'https://www.linkedin.com/in/cjenneracostadiaz' },

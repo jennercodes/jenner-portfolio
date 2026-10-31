@@ -38,6 +38,14 @@ export const getStaticPaths = (async () => {
         subtitle: 'De docente de tecnología a Senior Frontend Engineer.',
       },
     },
+    {
+      slug: 'privacidad',
+      og: {
+        eyebrow: 'Datos y cookies',
+        title: 'Privacidad',
+        subtitle: 'Analítica solo si aceptas. Sin formularios, cuentas ni publicidad.',
+      },
+    },
     ...proyectos.map((p) => ({
       slug: `proyectos/${p.id}`,
       og: {

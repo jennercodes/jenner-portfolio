@@ -222,6 +222,7 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
     { name: 'sobre-mi', desc: 'historia y trayectoria', run: () => read(doc('sobre-mi.md')) },
     { name: 'charlas', desc: 'charlas y conferencias', run: () => read(doc('charlas.md')) },
     { name: 'contacto', desc: 'email, WhatsApp y redes', run: () => read(doc('contacto.md')) },
+    { name: 'privacidad', desc: 'datos y cookies', run: () => read(doc('privacidad.md')) },
     {
       name: 'principios',
       desc: 'cómo se trabaja',
@@ -245,6 +246,8 @@ export function createChat({ shell, data, reduced, animate, onQuit }: ChatOption
     whoami: 'sobre-mi',
     contact: 'contacto',
     talks: 'charlas',
+    privacy: 'privacidad',
+    cookies: 'privacidad',
     cls: 'clear',
     salir: 'exit',
     quit: 'exit',

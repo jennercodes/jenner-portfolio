@@ -1,0 +1,30 @@
+---
+import { Content } from '../data/privacidad.md';
+import { site } from '../data/site';
+import Base from '../layouts/Base.astro';
+
+const schema = [
+  {
+    '@type': 'WebPage',
+    name: 'Privacidad',
+    url: `${site.url}/privacidad`,
+    inLanguage: 'es',
+    about: { '@id': `${site.url}/#person` },
+  },
+];
+---
+
+<Base
+  title="Privacidad"
+  description="Qué datos toca jenner.codes: analítica solo si aceptas, preferencias en tu navegador, alojamiento y contacto."
+  og="privacidad"
+  schema={schema}
+>
+  <article class="mx-auto max-w-6xl px-4 pt-12 pb-24 sm:px-8 sm:pt-20">
+    <p data-hero-item class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Datos y cookies</p>
+    <h1 data-split class="mt-4 text-5xl font-semibold tracking-[-0.04em] sm:text-7xl">Privacidad</h1>
+    <div data-reveal class="prose-case mt-12 max-w-2xl">
+      <Content />
+    </div>
+  </article>
+</Base>

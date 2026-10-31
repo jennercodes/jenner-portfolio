@@ -108,6 +108,12 @@ export function createDocs(data: TuiData): Map<string, Doc> {
   add('sobre-mi.md', '/sobre-mi', sobreMi(data));
   add('charlas.md', '/#charlas', charlas(data));
   add('contacto.md', '/#contacto', contacto(data));
+  // Los enlaces internos de la página salen al modo normal
+  add(
+    'privacidad.md',
+    '/privacidad',
+    `# Privacidad\n\n${data.privacidad.replace(/\]\(\//g, '](page:/')}`,
+  );
   return docs;
 }
 

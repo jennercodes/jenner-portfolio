@@ -326,8 +326,15 @@ html[data-mode="terminal"] {
   color-scheme: dark;
   overflow: hidden;
 
-  & body > :not([data-tui]) {
+  /* El banner de cookies sigue visible encima de la terminal */
+  & body > :not([data-tui], [data-consent]) {
     display: none;
+  }
+
+  /* Arriba, para no tapar la línea de comandos */
+  & [data-consent] {
+    top: calc(1rem + env(safe-area-inset-top));
+    bottom: auto;
   }
 
   & [data-tui] {

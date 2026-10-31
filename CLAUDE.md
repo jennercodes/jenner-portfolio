@@ -33,6 +33,8 @@ Astro 7 (estático, `build.format: 'file'`, `trailingSlash: 'never'`) · Tailwin
 | Tokens de color, degradados, `prose-case` | `src/styles/global.css` |
 | Layout + SEO + JSON-LD (Person; cada página suma el suyo con `schema`) | `src/layouts/Base.astro` |
 | Imágenes para compartir (og:image), generadas en build | `src/lib/og.ts` + `src/pages/og/[...slug].png.ts` (página nueva → agregarla ahí y pasar `og` a `Base`) |
+| Analítica (GA4 solo con consentimiento, Consent Mode v2 básico) | `src/lib/analytics.ts` + `src/components/ConsentBanner.astro` · ID en `site.gaId` |
+| Página de privacidad (web y modo terminal) | `src/data/privacidad.md` → `/privacidad`. Actualizarla si el sitio suma un servicio externo, cookies o datos |
 | Despliegue (Coolify, build pack Dockerfile, puerto 80) | `Dockerfile` + `docker/nginx.conf` |
 
 `featured: true` → aparece en "Trabajo seleccionado" de la portada. `personal: true` → etiqueta "Proyecto personal". Sin `end` → "— hoy".

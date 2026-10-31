@@ -1,0 +1,64 @@
+---
+/**
+ * Banner de cookies para Google Analytics (src/lib/analytics.ts).
+ * Aparece solo si no hay una decisión guardada; "Cookies" en el pie lo vuelve a abrir.
+ * En móvil queda sobre la barra de navegación inferior.
+ */
+---
+
+<div
+  data-consent
+  hidden
+  role="dialog"
+  aria-live="polite"
+  aria-labelledby="consent-title"
+  class="fixed inset-x-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-[110] mx-auto max-w-md rounded-xl border border-line bg-surface p-5 text-fg shadow-2xl md:inset-x-auto md:right-6 md:bottom-6"
+>
+  <p id="consent-title" class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Cookies</p>
+  <p class="mt-2 text-[15px] leading-relaxed text-muted">
+    <code data-consent-status class="font-mono text-[14px] text-fg">analytics: off</code>{' — '}se activa solo si aceptas.{' '}
+    <a href="/privacidad" class="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">Privacidad</a>
+  </p>
+  <div class="mt-4 flex gap-2 font-mono text-[13px]">
+    <button
+      type="button"
+      data-consent-choice="granted"
+      class="rounded-lg bg-btn-bg px-4 py-2 text-btn-fg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >Aceptar</button
+    >
+    <button
+      type="button"
+      data-consent-choice="denied"
+      class="rounded-lg border border-line px-4 py-2 text-fg transition-colors hover:bg-bg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >Rechazar</button
+    >
+  </div>
+</div>
+
+<script>
+  import { type Consent, getConsent, loadGa, setConsent } from '../lib/analytics';
+
+  const banner = document.querySelector<HTMLElement>('[data-consent]');
+  const consent = getConsent();
+
+  if (consent === 'granted') loadGa();
+  else if (consent === null && banner) banner.hidden = false;
+
+  banner?.addEventListener('click', (e) => {
+    const choice = (e.target as HTMLElement).closest<HTMLElement>('[data-consent-choice]')?.dataset.consentChoice;
+    if (choice !== 'granted' && choice !== 'denied') return;
+    setConsent(choice as Consent);
+    banner.hidden = true;
+  });
+
+  for (const open of document.querySelectorAll('[data-consent-open]')) {
+    open.addEventListener('click', () => {
+      if (!banner) return;
+      // Al reabrirlo, el estado refleja la decisión actual
+      const status = banner.querySelector('[data-consent-status]');
+      if (status) status.textContent = `analytics: ${getConsent() === 'granted' ? 'on' : 'off'}`;
+      banner.hidden = false;
+      banner.querySelector('button')?.focus();
+    });
+  }
+</script>

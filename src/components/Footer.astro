@@ -9,7 +9,11 @@ const year = new Date().getFullYear();
   <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-12 sm:flex-row sm:items-end sm:justify-between sm:px-8">
     <div class="flex flex-col gap-3">
       <Wordmark />
-      <p class="font-mono text-[13px] text-muted">{site.location} · © {year}</p>
+      <p class="font-mono text-[13px] text-muted">
+        {site.location} · © {year}{' · '}
+        <a href="/privacidad" class="text-muted transition-colors hover:text-fg">Privacidad</a>{' · '}
+        <button type="button" data-consent-open class="cursor-pointer text-muted transition-colors hover:text-fg">Cookies</button>
+      </p>
     </div>
     <ul class="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[13px]">
       {
